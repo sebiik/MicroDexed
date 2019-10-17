@@ -51,9 +51,11 @@
 #define MIDI_DEVICE_NUMBER 0
 
 // AUDIO
-// If nothing is defined PT8211 is used as audio output device!
-#define TEENSY_AUDIO_BOARD 1
-//#define TGA_AUDIO_BOARD
+// If nothing is defined Teensy internal DAC is used as audio output device!
+// Left and right channel audio signal is presented on pins A21 and A22.
+#define TEENSY_DAC
+// #define TEENSY_AUDIO_BOARD 1
+// #define TGA_AUDIO_BOARD
 
 //*************************************************************************************************
 //* MIDI SETTINGS
