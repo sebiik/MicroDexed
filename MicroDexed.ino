@@ -84,6 +84,12 @@ AudioControlWM8731master wm8731_1;
 AudioOutputAnalogStereo  dacOut;
 AudioConnection          patchCord11(volume_r, 0, dacOut, 0);
 AudioConnection          patchCord12(volume_l, 0, dacOut, 1);
+#elif defined(TEENSY_DAC_SYMMETRIC)
+AudioOutputAnalogStereo  dacOut;
+AudioMixer4              invMixer;
+AudioConnection          patchCord11(volume_l, 0, dacOut  , 0);
+AudioConnection          patchCord12(volume_l, 0, invMixer, 0);
+AudioConnection          patchCord13(invMixer, 0, dacOut  , 1);
 #else
 AudioOutputPT8211        pt8211_1;
 AudioConnection          patchCord11(volume_r, 0, pt8211_1, 0);
@@ -196,6 +202,9 @@ void setup()
   Serial.println(F("TGA board enabled."));
 #elif defined(TEENSY_DAC)
   Serial.println(F("Internal DAC enabled."));
+#elif defined(TEENSY_DAC_SYMMETRIC)
+  invMixer.gain(0,-1.f);
+  Serial.println(F("Internal DAC using symmetric outputs enabled."));
 #else
   Serial.println(F("PT8211 enabled."));
 #endif
