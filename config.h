@@ -53,8 +53,8 @@
 // AUDIO
 // If nothing is defined Teensy internal DAC is used as audio output device!
 // Left and right channel audio signal is presented on pins A21 and A22.
-#define TEENSY_DAC
-// #define TEENSY_AUDIO_BOARD 1
+// #define TEENSY_DAC
+#define TEENSY_AUDIO_BOARD 1
 // #define TGA_AUDIO_BOARD
 
 //*************************************************************************************************
