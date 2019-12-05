@@ -38,7 +38,7 @@
 // $ aplaymidi -p 20:0 <MIDI-File> # e.g. test.mid
 // $ arecord -f cd -Dhw:1,0 /tmp/bla.wav
 
-#define VERSION "0.9.5"
+#define VERSION "0.9.5a"
 
 //*************************************************************************************************
 //* DEVICE SETTINGS
@@ -99,6 +99,7 @@
 #endif
 #define SAMPLE_RATE 44100
 #define SOFTEN_VALUE_CHANGE_STEPS 20
+#define NORMALIZE_DX_VELOCITY 1
 
 //*************************************************************************************************
 //* UI AND DATA-STORE SETTINGS
