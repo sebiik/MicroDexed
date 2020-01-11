@@ -126,7 +126,7 @@
 //#define SDCARD_SCK_PIN   14
 #define SGTL5000_LINEOUT_LEVEL 29
 // Teensy 3.5 & 3.6 SD card
-#define SDCARD_CS_PIN    BUILTIN_SDCARD
+#define SDCARD_CS_PIN    4 //BUILTIN_SDCARD
 #define SDCARD_MOSI_PIN  11  // not actually used
 #define SDCARD_SCK_PIN   13  // not actually used
 
