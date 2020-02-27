@@ -20,6 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
 */
 
 #include "config.h"
@@ -66,6 +67,7 @@ uint8_t ui_main_state = UI_MAIN_VOICE;
 #include "adc.h" //seb
 #include "din.h" //seb
 #include "guiTool.h" //seb
+
 
 
 Dexed* dexed = new Dexed(SAMPLE_RATE);
@@ -132,6 +134,7 @@ void setup() {
   Serial.println(F("(c)2018,2019 H. Wirtz <wirtz@parasitstudio.de>"));
   Serial.println(F("edited 2019,2020 by sebiiksbcs"));
   Serial.println(F("https://github.com/dcoredump/MicroDexed"));
+
   Serial.print(F("Version: "));
   Serial.println(VERSION);
   Serial.println(F("<setup start>"));
@@ -225,6 +228,7 @@ void setup() {
   }
 
   #ifdef I2C_DISPLAY
+
   enc[0].write(map(configuration.vol * 100, 0, 100, 0, ENC_VOL_STEPS));
   enc_val[0] = enc[0].read();
   enc[1].write(configuration.voice);
@@ -244,6 +248,7 @@ void setup() {
   #endif
 
   #ifdef DEBUG
+
   Serial.print(F("Bank/Voice from EEPROM ["));
   Serial.print(configuration.bank, DEC);
   Serial.print(F("/"));
@@ -278,6 +283,7 @@ void setup() {
 
 
 void loop() {
+
 
   int16_t* audio_buffer; // pointer to AUDIO_BLOCK_SAMPLES * int16_t
   const uint16_t audio_block_time_us = 1000000 / (SAMPLE_RATE / AUDIO_BLOCK_SAMPLES);
@@ -357,10 +363,9 @@ void loop() {
 }
 
 
-/******************************************************************************
-MIDI MESSAGE HANDLER
-******************************************************************************/
+/* MIDI MESSAGE HANDLER */
 void handleNoteOn(byte inChannel, byte inNumber, byte inVelocity) {
+
   if (checkMidiChannel(inChannel))
   {
     dexed->keydown(inNumber, inVelocity);
@@ -391,6 +396,7 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
         if (inValue < MAX_BANKS) {
           configuration.bank = inValue;
           handle_ui();
+
         }
         break;
       case 1:
@@ -516,6 +522,7 @@ void handleSystemExclusive(byte * sysex, uint len) {
   Serial.print(len, DEC);
   Serial.print(F("]"));
   for (uint8_t i = 0; i < len; i++) {
+
     Serial.print(F(" "));
     Serial.print(sysex[i], DEC);
   }
@@ -555,6 +562,7 @@ void handleSystemExclusive(byte * sysex, uint len) {
       #ifdef DEBUG
       Serial.println(F("E: SysEx end status byte not detected."));
       #endif
+
       return;
     }
 
@@ -619,6 +627,7 @@ void handleTuneRequest(void) {
 }
 
 void handleClock(void) {
+
   midi_timing_counter++;
   if (midi_timing_counter % 24 == 0)
   {
@@ -656,14 +665,13 @@ void handleSystemReset(void) {
   #ifdef DEBUG
   Serial.println(F("MIDI SYSEX RESET"));
   #endif
+
   dexed->notesOff();
   dexed->panic();
   dexed->resetControllers();
 }
 
-/******************************************************************************
-MIDI HELPER
-******************************************************************************/
+/* MIDI HELPER */
 
 bool checkMidiChannel(byte inChannel) {
   // check for MIDI channel
@@ -672,6 +680,7 @@ bool checkMidiChannel(byte inChannel) {
   }
   else if (inChannel != configuration.midi_channel) {
     #ifdef DEBUG
+
     Serial.print(F("Ignoring MIDI data on channel "));
     Serial.print(inChannel);
     Serial.print(F("(listening on "));
@@ -683,15 +692,14 @@ bool checkMidiChannel(byte inChannel) {
   return (true);
 }
 
-/******************************************************************************
-VOLUME HELPER
-******************************************************************************/
+/* VOLUME HELPER */
 
 void set_volume(float v, float p) {
   configuration.vol = v;
   configuration.pan = p;
 
   #ifdef DEBUG
+
   Serial.print(F("Setting volume: VOL="));
   Serial.print(v, DEC);
   Serial.print(F("["));
@@ -717,15 +725,15 @@ void set_volume(float v, float p) {
 
 // https://www.dr-lex.be/info-stuff/volumecontrols.html#table1
 inline float logvol(float x) {
+
   return (0.001 * expf(6.908 * x));
 }
 
 
-/******************************************************************************
-EEPROM HELPER
-******************************************************************************/
+/* EEPROM HELPER */
 
 void initial_values_from_eeprom(void) {
+
   uint32_t checksum;
   config_t tmp_conf;
 
@@ -754,6 +762,7 @@ void initial_values_from_eeprom(void) {
 }
 
 void eeprom_write(void) {
+
   autostore = 0;
   eeprom_update_flag = true;
 }
@@ -783,12 +792,11 @@ uint32_t crc32(byte * calc_start, uint16_t calc_bytes) { // base code from https
   return (crc);
 }
 
-/******************************************************************************
-DEBUG HELPER
-******************************************************************************/
+/* DEBUG HELPER */
 
 #if defined (DEBUG) && defined (SHOW_CPU_LOAD_MSEC)
 void show_cpu_and_mem_usage(void) {
+
   Serial.print(F("CPU: "));
   Serial.print(AudioProcessorUsage(), 2);
   Serial.print(F("%   CPU MAX: "));

@@ -56,7 +56,13 @@ extern uint8_t effect_delay_time;
 extern uint8_t effect_delay_feedback;
 extern uint8_t effect_delay_volume;
 extern bool effect_delay_sync;
+
+#if defined(EXTERNAL_DELAY_RAM)
+extern AudioEffectDelayExternal delay1;
+#else
 extern AudioEffectDelay delay1;
+#endif
+
 extern AudioMixer4 dlyFbMixer;
 extern AudioMixer4 dlyMixer;
 

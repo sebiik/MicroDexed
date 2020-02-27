@@ -48,6 +48,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 #define TEENSY_AUDIO_BOARD 1
 //#define TGA_AUDIO_BOARD
 
+// Whether the Teensy Audio Board is equipped with an 23LC1024 RAM chip
+#define EXTERNAL_DELAY_RAM 1 //seb
+
 //*************************************************************************************************
 //* MIDI SETTINGS
 //*************************************************************************************************

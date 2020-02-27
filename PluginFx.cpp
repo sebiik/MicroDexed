@@ -112,12 +112,12 @@ void PluginFx::process(float *work, int sampleSize) {
 
   if ( Gain != 1 ) {
     for (int i = 0; i < sampleSize; i++ )
-    work[i] *= Gain;
+      work[i] *= Gain;
   }
 
   // don't apply the LPF if the cutoff is to maximum
   if ( Cutoff == 1 )
-  return;
+    return;
 
   if ( Cutoff != pCutoff || Reso != pReso ) {
     rReso = (0.991 - logsc(1 - Reso, 0, 0.991));
@@ -160,17 +160,17 @@ void PluginFx::process(float *work, int sampleSize) {
 
     switch (mmch) {
       case 0:
-      mc = ((1 - mmt) * y4 + (mmt) * y3);
-      break;
+        mc = ((1 - mmt) * y4 + (mmt) * y3);
+        break;
       case 1:
-      mc = ((1 - mmt) * y3 + (mmt) * y2);
-      break;
+        mc = ((1 - mmt) * y3 + (mmt) * y2);
+        break;
       case 2:
-      mc = ((1 - mmt) * y2 + (mmt) * y1);
-      break;
+        mc = ((1 - mmt) * y2 + (mmt) * y1);
+        break;
       case 3:
-      mc = y1;
-      break;
+        mc = y1;
+        break;
     }
 
     //half volume comp
@@ -183,32 +183,30 @@ void PluginFx::process(float *work, int sampleSize) {
 // THIS IS THE 2POLE FILTER
 
 for(int i=0; i < sampleSize; i++ ) {
-float s = work[i];
-s = s - 0.45*tptlpupw(c,s,15,sampleRateInv);
-s = tptpc(d,s,bright);
+  float s = work[i];
+  s = s - 0.45*tptlpupw(c,s,15,sampleRateInv);
+  s = tptpc(d,s,bright);
 
-//float v = ((sample- R * s1*2 - g2*s1 - s2)/(1+ R*g1*2 + g1*g2));
-float v = NR(s,g);
-float y1 = v*g + s1;
-//damping
-s1 = atanf(s1 * rcor) * rcorInv;
+  //float v = ((sample- R * s1*2 - g2*s1 - s2)/(1+ R*g1*2 + g1*g2));
+  float v = NR(s,g);
+  float y1 = v*g + s1;
+  //damping
+  s1 = atanf(s1 * rcor) * rcorInv;
 
-float y2 = y1*g + s2;
-s2 = y2 + y1*g;
+  float y2 = y1*g + s2;
+  s2 = y2 + y1*g;
 
-float mc;
-if(!bandPassSw)
-mc = (1-mm)*y2 + (mm)*v;
-else
-{
+  float mc;
+  if(!bandPassSw)
+  mc = (1-mm)*y2 + (mm)*v;
+  else
+  {
+    mc =2 * ( mm < 0.5 ?
+      ((0.5 - mm) * y2 + (mm) * y1) :
+      ((1-mm) * y1 + (mm-0.5) * v) );
+  }
 
-mc =2 * ( mm < 0.5 ?
-((0.5 - mm) * y2 + (mm) * y1):
-((1-mm) * y1 + (mm-0.5) * v)
-);
-}
-
-work[i] = mc;
+  work[i] = mc;
 }
 
 */

@@ -25,12 +25,12 @@
 
 template<typename T, size_t size, size_t alignment = 16>
 class AlignedBuf {
-public:
-  T *get() {
-    return (T *)((((intptr_t)storage_) + alignment - 1) & -alignment);
-  }
-private:
-  unsigned char storage_[size * sizeof(T) + alignment];
+  public:
+    T *get() {
+      return (T *)((((intptr_t)storage_) + alignment - 1) & -alignment);
+    }
+  private:
+    unsigned char storage_[size * sizeof(T) + alignment];
 };
 
 #endif  // __ALIGNED_BUF_H

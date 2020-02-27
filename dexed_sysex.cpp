@@ -264,8 +264,8 @@ bool load_sysex(uint8_t b, uint8_t v)
 #endif
   }
 #ifdef DEBUG
- if (found == false)
-   Serial.println(F("E : File not found."));
+  if (found == false)
+    Serial.println(F("E : File not found."));
 #endif
 
   return (false);

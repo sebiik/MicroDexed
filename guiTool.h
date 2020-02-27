@@ -1,6 +1,5 @@
 AudioPlayQueue           queue1;
 AudioAnalyzePeak         peak1;
-AudioEffectDelay         delay1;
 AudioMixer4              dlyFbMixer;
 AudioMixer4              dlyMixer;
 AudioConnection          patchCord0(queue1, peak1);
@@ -10,6 +9,13 @@ AudioConnection          patchCord3(delay1, 0, dlyFbMixer, 1);
 AudioConnection          patchCord4(delay1, 0, dlyMixer, 2);
 AudioConnection          patchCord5(dlyFbMixer, delay1);
 AudioConnection          patchCord6(dlyFbMixer, 0, dlyMixer, 1);
+
+#if defined(EXTERNAL_DELAY_RAM)
+AudioEffectDelayExternal delay1;
+#else
+AudioEffectDelay         delay1;
+#endif
+
 #if defined(TEENSY_AUDIO_BOARD)
 AudioOutputI2S           i2s1;
 AudioConnection          patchCord7(dlyMixer, 0, i2s1, 0);
