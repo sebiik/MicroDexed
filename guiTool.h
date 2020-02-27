@@ -30,6 +30,16 @@ AudioConnection          patchCord8(dlyMixer, volume_l);
 AudioConnection          patchCord9(volume_r, 0, i2s1, 1);
 AudioConnection          patchCord10(volume_l, 0, i2s1, 0);
 AudioControlWM8731master wm8731_1;
+#elif defined(TEENSY_DAC)
+AudioOutputAnalogStereo  dacOut;
+AudioConnection          patchCord11(volume_r, 0, dacOut, 0);
+AudioConnection          patchCord12(volume_l, 0, dacOut, 1);
+#elif defined(TEENSY_DAC_SYMMETRIC)
+AudioOutputAnalogStereo  dacOut;
+AudioMixer4              invMixer;
+AudioConnection          patchCord11(volume_l, 0, dacOut  , 0);
+AudioConnection          patchCord12(volume_l, 0, invMixer, 0);
+AudioConnection          patchCord13(invMixer, 0, dacOut  , 1);
 #else
 AudioOutputPT8211        pt8211_1;
 AudioAmplifier           volume_master;

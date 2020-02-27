@@ -48,8 +48,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 #define TEENSY_AUDIO_BOARD 1
 //#define TGA_AUDIO_BOARD
 
-// Whether the Teensy Audio Board is equipped with an 23LC1024 RAM chip
+// Left and right channel audio signal is presented on pins A21 and A22.
+// #define TEENSY_DAC
+
+// If the Teensy Audio Board is equipped with an 23LC1024 RAM chip, use it for the delay
 #define EXTERNAL_DELAY_RAM 1 //seb
+
+//TODO: add freeverb option
+// #define USE_REVERB 1
+
 
 //*************************************************************************************************
 //* MIDI SETTINGS
@@ -93,6 +100,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 #define REDUCE_LOUDNESS 1
 #endif
 #define SAMPLE_RATE 44100
+#define SOFTEN_VALUE_CHANGE_STEPS 20 //seb TODO: check what this is
+#define NORMALIZE_DX_VELOCITY 1
 
 //*************************************************************************************************
 //* UI AND DATA-STORE SETTINGS
@@ -120,7 +129,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 //#define SDCARD_SCK_PIN   14
 #define SGTL5000_LINEOUT_LEVEL 29
 // Teensy 3.5 & 3.6 SD card
-#define SDCARD_CS_PIN    BUILTIN_SDCARD
+#define SDCARD_CS_PIN    4 // BUILTIN_SDCARD
 #define SDCARD_MOSI_PIN  11  // not actually used
 #define SDCARD_SCK_PIN   13  // not actually used
 
@@ -141,7 +150,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 #define BUT_R_PIN    30
 #define INITIAL_ENC_R_VALUE 0
 #define BUT_DEBOUNCE_MS 10
-#define LONG_BUTTON_PRESS 500
+#define LONG_BUTTON_PRESS 750
 
 // LCD Display
 #define I2C_DISPLAY 1

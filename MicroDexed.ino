@@ -62,6 +62,8 @@ Bounce but[2] = {
 elapsedMillis master_timer;
 uint8_t ui_state = UI_MAIN;
 uint8_t ui_main_state = UI_MAIN_VOICE;
+#else
+float mapfloat(float val, float in_min, float in_max, float out_min, float out_max);
 #endif
 
 #include "adc.h" //seb
@@ -171,6 +173,11 @@ void setup() {
   wm8731_1.enable();
   wm8731_1.volume(1.0);
   Serial.println(F("TGA board enabled."));
+  #elif defined(TEENSY_DAC)
+  Serial.println(F("Internal DAC enabled."));
+  #elif defined(TEENSY_DAC_SYMMETRIC)
+  invMixer.gain(0,-1.f);
+  Serial.println(F("Internal DAC using symmetric outputs enabled."));
   #else
   Serial.println(F("PT8211 enabled."));
   #endif
@@ -341,7 +348,9 @@ void loop() {
   if (master_timer >= TIMER_UI_HANDLING_MS) {
     master_timer -= TIMER_UI_HANDLING_MS;
 
+    #ifdef I2C_DISPLAY
     handle_ui();
+    #endif
     // handle custom buttons //seb
     handle_myButtons();
 
@@ -395,7 +404,9 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
       case 0:
         if (inValue < MAX_BANKS) {
           configuration.bank = inValue;
+          #ifdef I2C_DISPLAY
           handle_ui();
+          #endif
 
         }
         break;
@@ -436,27 +447,37 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
       case 103:  // CC 103: filter resonance
         effect_filter_resonance = map(inValue, 0, 127, 0, ENC_FILTER_RES_STEPS);
         dexed->fx.Reso = 1.0 - float(effect_filter_resonance) / ENC_FILTER_RES_STEPS;
+        #ifdef I2C_DISPLAY
         handle_ui();
+        #endif
         break;
       case 104:  // CC 104: filter cutoff
         effect_filter_cutoff = map(inValue, 0, 127, 0, ENC_FILTER_CUT_STEPS);
         dexed->fx.Cutoff = 1.0 - float(effect_filter_cutoff) / ENC_FILTER_CUT_STEPS;
+        #ifdef I2C_DISPLAY
         handle_ui();
+        #endif
         break;
       case 105:  // CC 105: delay time
         effect_delay_time = map(inValue, 0, 127, 0, ENC_DELAY_TIME_STEPS);
         delay1.delay(0, mapfloat(effect_delay_time, 0, ENC_DELAY_TIME_STEPS, 0.0, DELAY_MAX_TIME));
+        #ifdef I2C_DISPLAY
         handle_ui();
+        #endif
         break;
       case 106:  // CC 106: delay feedback
         effect_delay_feedback = map(inValue, 0, 127, 0, ENC_DELAY_FB_STEPS);
         dlyFbMixer.gain(1, mapfloat(float(effect_delay_feedback), 0, ENC_DELAY_FB_STEPS, 0.0, 1.0));
+        #ifdef I2C_DISPLAY
         handle_ui();
+        #endif
         break;
       case 107:  // CC 107: delay volume
         effect_delay_volume = map(inValue, 0, 127, 0, ENC_DELAY_VOLUME_STEPS);
         dlyMixer.gain(1, mapfloat(effect_delay_volume, 0, ENC_DELAY_VOLUME_STEPS, 0.0, 1.0)); // delay tap1 signal (with added feedback)
+        #ifdef I2C_DISPLAY
         handle_ui();
+        #endif
         break;
       case 120:
         dexed->panic();
@@ -493,7 +514,9 @@ void handleProgramChange(byte inChannel, byte inProgram) {
   if (inProgram < MAX_VOICES)
   {
     load_sysex(configuration.bank, inProgram);
+    #ifdef I2C_DISPLAY
     handle_ui();
+    #endif
   }
 }
 

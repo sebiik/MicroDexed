@@ -540,8 +540,8 @@ void ui_show_effects_delay(void) {
 
   ui_state = UI_EFFECTS_DELAY;
 }
+#endif
 
 float mapfloat(float val, float in_min, float in_max, float out_min, float out_max) {
   return (val - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
-#endif
