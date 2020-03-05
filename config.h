@@ -1,26 +1,29 @@
 /*
 MicroDexed
-
 MicroDexed is a port of the Dexed sound engine
 (https://github.com/asb2m10/dexed) for the Teensy-3.5/3.6 with audio shield.
-Dexed ist heavily based on https://github.com/google/music-synthesizer-for-android
-
+Dexed ist heavily based on
+https://github.com/google/music-synthesizer-for-android
 (c)2018,2019 H. Wirtz <wirtz@parasitstudio.de>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+*/
 
+/* Seb Arduino upload settings:
+Board: "Teensy 3.5/3.6"
+USB Type: "Serial + MIDI"
+CPU Speed: "120 MHz"
+Optimize: "Fastest + pure-code"
 */
 
 #ifndef CONFIG_H_INCLUDED
@@ -31,7 +34,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 // ATTENTION! For better latency you have to redefine AUDIO_BLOCK_SAMPLES from
 // 128 to 64 in <ARDUINO-IDE-DIR>/cores/teensy3/AudioStream.h
 
-#define VERSION "0.9.4"
+#define VERSION "0.9.4s"
 
 //*************************************************************************************************
 //* DEVICE SETTINGS
@@ -40,7 +43,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 // MIDI
 #define MIDI_DEVICE_DIN Serial1
 #define MIDI_DEVICE_USB 1
-#define MIDI_DEVICE_USB_HOST 1
+// #define MIDI_DEVICE_USB_HOST 1
 #define MIDI_DEVICE_NUMBER 0
 
 // AUDIO
@@ -52,7 +55,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 // #define TEENSY_DAC
 
 // If the Teensy Audio Board is equipped with an 23LC1024 RAM chip, use it for the delay
-#define EXTERNAL_DELAY_RAM 1 //seb
+// #define EXTERNAL_DELAY_RAM 1 //seb
 
 //TODO: add freeverb option
 // #define USE_REVERB 1
@@ -129,17 +132,17 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 //#define SDCARD_SCK_PIN   14
 #define SGTL5000_LINEOUT_LEVEL 29
 // Teensy 3.5 & 3.6 SD card
-#define SDCARD_CS_PIN    4 // BUILTIN_SDCARD
+#define SDCARD_CS_PIN    BUILTIN_SDCARD
 #define SDCARD_MOSI_PIN  11  // not actually used
 #define SDCARD_SCK_PIN   13  // not actually used
 
 // Encoder with button
-#define ENC_VOL_STEPS 43
-#define ENC_FILTER_RES_STEPS 100
-#define ENC_FILTER_CUT_STEPS 100
-#define ENC_DELAY_TIME_STEPS 50
-#define ENC_DELAY_FB_STEPS 35
-#define ENC_DELAY_VOLUME_STEPS 50
+#define ENC_VOL_STEPS 127
+#define ENC_FILTER_RES_STEPS 127
+#define ENC_FILTER_CUT_STEPS 127
+#define ENC_DELAY_TIME_STEPS 127
+#define ENC_DELAY_FB_STEPS 127
+#define ENC_DELAY_VOLUME_STEPS 127
 #define NUM_ENCODER 2
 #define ENC_L_PIN_A  3
 #define ENC_L_PIN_B  2

@@ -1,28 +1,3 @@
-/*
-MicroDexed
-
-MicroDexed is a port of the Dexed sound engine
-(https://github.com/asb2m10/dexed) for the Teensy-3.5/3.6 with audio shield.
-Dexed ist heavily based on https://github.com/google/music-synthesizer-for-android
-
-(c)2018,2019 H. Wirtz <wirtz@parasitstudio.de>
-
-This program is free software; you can relidistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software Foundation,
-Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
-
-*/
-
 #include "config.h"
 #include <Audio.h>
 #include <Wire.h>
@@ -36,7 +11,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 #include "dexed.h"
 #include "dexed_sysex.h"
 #include "PluginFx.h"
-
 
 
 #ifdef I2C_DISPLAY // selecting sounds by encoder, button and display
@@ -62,48 +36,16 @@ Bounce but[2] = {
 elapsedMillis master_timer;
 uint8_t ui_state = UI_MAIN;
 uint8_t ui_main_state = UI_MAIN_VOICE;
-#else
-float mapfloat(float val, float in_min, float in_max, float out_min, float out_max);
+// #else
+// float mapfloat(float val, float in_min, float in_max, float out_min, float out_max);
 #endif
 
 #include "adc.h" //seb
 #include "din.h" //seb
 #include "guiTool.h" //seb
+#include "variables.h" //seb
 
-
-
-Dexed* dexed = new Dexed(SAMPLE_RATE);
-bool sd_card_available = false;
-uint32_t xrun = 0;
-uint32_t overload = 0;
-uint32_t peak = 0;
-uint16_t render_time_max = 0;
-uint8_t max_loaded_banks = 0;
-char bank_name[BANK_NAME_LEN];
-char voice_name[VOICE_NAME_LEN];
-char bank_names[MAX_BANKS][BANK_NAME_LEN];
-char voice_names[MAX_VOICES][VOICE_NAME_LEN];
-elapsedMillis autostore;
-uint8_t midi_timing_counter = 0; // 24 per qarter
-elapsedMillis midi_timing_timestep;
-uint16_t midi_timing_quarter = 0;
-elapsedMillis long_button_pressed;
-uint8_t effect_filter_cutoff = 0;
-uint8_t effect_filter_resonance = 0;
-uint8_t effect_delay_time = 0;
-uint8_t effect_delay_feedback = 0;
-uint8_t effect_delay_volume = 0;
-bool effect_delay_sync = 0;
-elapsedMicros fill_audio_buffer;
-elapsedMillis control_rate;
-uint8_t active_voices = 0;
-#ifdef SHOW_CPU_LOAD_MSEC
-elapsedMillis cpu_mem_millis;
-#endif
-config_t configuration = {0xffff, 0, 0, VOLUME, 0.5f, DEFAULT_MIDI_CHANNEL};
-bool eeprom_update_flag = false;
-
-
+/******************************** Setup ********************************/
 void setup() {
 
   //while (!Serial) ; // wait for Arduino Serial Monitor
@@ -119,7 +61,7 @@ void setup() {
   lcd.clear();
   lcd.display();
   lcd.home();
-  lcd.write("MicroDexed ");
+  lcd.write("MicroDexed");
   lcd.write(VERSION);
   lcd.setCursor(0, 1);
   lcd.write("(c)parasiTstudio");
@@ -135,7 +77,6 @@ void setup() {
   Serial.println(F("MicroDexed based on https://github.com/asb2m10/dexed"));
   Serial.println(F("(c)2018,2019 H. Wirtz <wirtz@parasitstudio.de>"));
   Serial.println(F("edited 2019,2020 by sebiiksbcs"));
-  Serial.println(F("https://github.com/dcoredump/MicroDexed"));
 
   Serial.print(F("Version: "));
   Serial.println(VERSION);
@@ -162,8 +103,6 @@ void setup() {
   sgtl5000_1.audioPostProcessorEnable();
   sgtl5000_1.autoVolumeControl(1, 1, 1, 0.9, 0.01, 0.05);
   sgtl5000_1.autoVolumeEnable();
-  //sgtl5000_1.surroundSoundEnable();
-  //sgtl5000_1.surroundSound(width, select);
   //sgtl5000_1.enhanceBass(lr_lev, bass_lev, hpf_bypass, cutoff);
   sgtl5000_1.enhanceBass(1.0, 0.2, 1, 2); // //seb Configures the bass enhancement by setting the levels of the original stereo signal and the bass-enhanced mono level which will be mixed together. The high-pass filter may be enabled (0) or bypassed (1).
   sgtl5000_1.enhanceBassEnable();
@@ -184,11 +123,14 @@ void setup() {
 
   set_volume(configuration.vol, configuration.pan);
 
+  /* Initialize white noise */
+  noise1.amplitude(0.25);
+
   // start SD card
   SPI.setMOSI(SDCARD_MOSI_PIN);
   SPI.setSCK(SDCARD_SCK_PIN);
   if (!SD.begin(SDCARD_CS_PIN)) {
-    Serial.println(F("SD card not accessible."));
+    Serial.println(F("Couldn't find SD card."));
     strcpy(bank_name, "Default");
     strcpy(voice_name, "Default");
   } else {
@@ -226,6 +168,7 @@ void setup() {
     dlyMixer.gain(0, 1.0 - mapfloat(effect_delay_volume, 0, ENC_DELAY_VOLUME_STEPS, 0.0, 1.0)); // original signal
     dlyMixer.gain(1, mapfloat(effect_delay_volume, 0, ENC_DELAY_VOLUME_STEPS, 0.0, 1.0)); // delayed signal (including feedback)
     dlyMixer.gain(2, mapfloat(effect_delay_volume, 0, ENC_DELAY_VOLUME_STEPS, 0.0, 1.0)); // only delayed signal (without feedback)
+    dlyMixer.gain(3, 0.0); //TODO white noise signal
     dexed->fx.Gain =  1.0;
     dexed->fx.Reso = 1.0 - float(effect_filter_resonance) / ENC_FILTER_RES_STEPS;
     dexed->fx.Cutoff = 1.0 - float(effect_filter_cutoff) / ENC_FILTER_CUT_STEPS;
@@ -244,8 +187,8 @@ void setup() {
   but[1].update();
 
   //seb
-  init_myButtons();
-  handle_myButtons();
+  // init_myButtons();
+  // handle_myButtons();
   #endif
 
   #if defined (DEBUG) && defined (SHOW_CPU_LOAD_MSEC)
@@ -282,15 +225,13 @@ void setup() {
   AudioInterrupts();
   Serial.println(F("<setup end>"));
 
-  lcd.clear();
-
   // initialize ADC values
   initADC();
 }
 
 
+/******************************** Loop *********************************/
 void loop() {
-
 
   int16_t* audio_buffer; // pointer to AUDIO_BLOCK_SAMPLES * int16_t
   const uint16_t audio_block_time_us = 1000000 / (SAMPLE_RATE / AUDIO_BLOCK_SAMPLES);
@@ -335,13 +276,13 @@ void loop() {
     active_voices = dexed->getNumNotesPlaying();
   }
 
-  #ifdef I2C_DISPLAY
+  // #ifdef I2C_DISPLAY
 
   if (master_timer >= TIMER_UI_HANDLING_MS_ADC) { //seb ADC handling
     // handle ADC pots //seb
-    readADC();
+    // readADC();
     // send midi CC if any changed //seb
-    updateCC();
+    // updateCC();
   }
 
   // UI-HANDLING
@@ -352,16 +293,12 @@ void loop() {
     handle_ui();
     #endif
     // handle custom buttons //seb
-    handle_myButtons();
+    // handle_myButtons();
 
-
-    lcd.setCursor(0,1);
-    lcd.write("Layer: ");
-    lcd.print(activeLayer);
   }
 
 
-  #endif
+  // #endif
 
   #if defined (DEBUG) && defined (SHOW_CPU_LOAD_MSEC)
   if (cpu_mem_millis >= SHOW_CPU_LOAD_MSEC) {
@@ -381,7 +318,6 @@ void handleNoteOn(byte inChannel, byte inNumber, byte inVelocity) {
   }
 }
 
-
 void handleNoteOff(byte inChannel, byte inNumber, byte inVelocity) {
   if (checkMidiChannel(inChannel))
   {
@@ -389,10 +325,8 @@ void handleNoteOff(byte inChannel, byte inNumber, byte inVelocity) {
   }
 }
 
-
 void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
-  if (checkMidiChannel(inChannel))
-  {
+  if (checkMidiChannel(inChannel)) {
     #ifdef DEBUG
     Serial.print(F("CC#"));
     Serial.print(inCtrl, DEC);
@@ -479,6 +413,9 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
         handle_ui();
         #endif
         break;
+      case 109: // CC 109: white noise volume //TODO
+        // dlyMixer.gain(3, inValue * DIV127);
+        break;
       case 120:
         dexed->panic();
         break;
@@ -498,17 +435,14 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
   }
 }
 
-
 void handleAfterTouch(byte inChannel, byte inPressure) {
   dexed->controllers.aftertouch_cc = inPressure;
   dexed->controllers.refresh();
 }
 
-
 void handlePitchBend(byte inChannel, int inPitch) {
   dexed->controllers.values_[kControllerPitch] = inPitch + 0x2000; // -8192 to +8191 --> 0 to 16383
 }
-
 
 void handleProgramChange(byte inChannel, byte inProgram) {
   if (inProgram < MAX_VOICES)
@@ -519,7 +453,6 @@ void handleProgramChange(byte inChannel, byte inProgram) {
     #endif
   }
 }
-
 
 void handleSystemExclusive(byte * sysex, uint len) {
   /*
@@ -694,8 +627,8 @@ void handleSystemReset(void) {
   dexed->resetControllers();
 }
 
-/* MIDI HELPER */
 
+/* MIDI HELPER */
 bool checkMidiChannel(byte inChannel) {
   // check for MIDI channel
   if (configuration.midi_channel == MIDI_CHANNEL_OMNI) {
@@ -716,7 +649,6 @@ bool checkMidiChannel(byte inChannel) {
 }
 
 /* VOLUME HELPER */
-
 void set_volume(float v, float p) {
   configuration.vol = v;
   configuration.pan = p;
@@ -754,7 +686,6 @@ inline float logvol(float x) {
 
 
 /* EEPROM HELPER */
-
 void initial_values_from_eeprom(void) {
 
   uint32_t checksum;
@@ -797,7 +728,7 @@ void eeprom_update(void) {
   Serial.println(F("Updating EEPROM with configuration data"));
 }
 
-uint32_t crc32(byte * calc_start, uint16_t calc_bytes) { // base code from https://www.arduino.cc/en/Tutorial/EEPROMCrc
+uint32_t crc32(byte * calc_start, uint16_t calc_bytes) {
   const uint32_t crc_table[16] = {
     0x00000000, 0x1db71064, 0x3b6e20c8, 0x26d930ac,
     0x76dc4190, 0x6b6b51f4, 0x4db26158, 0x5005713c,
@@ -816,7 +747,6 @@ uint32_t crc32(byte * calc_start, uint16_t calc_bytes) { // base code from https
 }
 
 /* DEBUG HELPER */
-
 #if defined (DEBUG) && defined (SHOW_CPU_LOAD_MSEC)
 void show_cpu_and_mem_usage(void) {
 

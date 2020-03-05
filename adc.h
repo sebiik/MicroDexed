@@ -1,6 +1,6 @@
 #define NUM_ADC_CHANNELS 2
 #define NUM_LAYERS 4
-#define NUM_CONTROLS NUM_ADC_CHANNELS * NUM_LAYERS
+#define NUM_CONTROLS (NUM_ADC_CHANNELS * NUM_LAYERS)
 #define MOV_AVG 8
 
 const uint8_t ainPinList[12] = {1, 2, 3, 6, 7, 16, 17, 18, 19, 20, 21, 22};
@@ -11,6 +11,14 @@ float ainRead[NUM_ADC_CHANNELS];
 uint8_t pots[NUM_LAYERS][NUM_ADC_CHANNELS];
 uint8_t potsLast[NUM_LAYERS][NUM_ADC_CHANNELS];
 uint8_t activeLayer = 0;
+
+void initADC(void) {
+  for (uint8_t i = 0; i < NUM_LAYERS; i++) {
+    for (uint8_t j = 0; j < NUM_ADC_CHANNELS; j++) {
+      potsLast[i][j] = pots[i][j];
+    }
+  }
+}
 
 void readADC(void) {
   // Loop through ADC channels
@@ -31,16 +39,6 @@ void readADC(void) {
     }
   }
 }
-
-
-void initADC(void) {
-  for (uint8_t i = 0; i < NUM_LAYERS; i++) {
-    for (uint8_t j = 0; j < NUM_ADC_CHANNELS; j++) {
-      potsLast[i][j] = pots[i][j];
-    }
-  }
-}
-
 
 void sendCC(uint8_t layer, uint8_t pot, uint8_t ccValue, uint8_t outChannel) {
   midi_serial.sendControlChange(layerList[layer]+pot, ccValue, outChannel);
