@@ -1,0 +1,1 @@
+- expf() instead of sq() for all frequency-related conversions
