@@ -151,6 +151,18 @@ void setup() {
     // dexed->fx.Reso = 1.0;// - float(effect_filter_resonance) / ENC_FILTER_RES_STEPS;
     // dexed->fx.Cutoff = 0.5;// - float(effect_filter_cutoff) / ENC_FILTER_CUT_STEPS;
 
+    queueAmp.gain(0, 0.5);
+    dcOneVolt.amplitude(1.0);
+    masterFilter.octaveControl(7);
+    masterFilter.frequency(40);
+    masterFilter.resonance(0.7);
+    filterModMixer.gain(0, 1);
+    filterModMixer.gain(1, 1);
+    filterEnv.releaseNoteOn(1);
+    filterEnv.attack(0.1);
+    filterEnv.decay(500);
+    filterEnv.sustain(1);
+    filterEnv.release(10000);
     // load default SYSEX data
     load_sysex(configuration.bank, configuration.voice);
   }
@@ -290,6 +302,8 @@ void handleNoteOn(byte inChannel, byte inNumber, byte inVelocity) {
   if (checkMidiChannel(inChannel))
   {
     dexed->keydown(inNumber, inVelocity);
+    if (voiceCount == 0) filterEnv.noteOn();
+    voiceCount++;
   }
 }
 
@@ -297,6 +311,8 @@ void handleNoteOff(byte inChannel, byte inNumber, byte inVelocity) {
   if (checkMidiChannel(inChannel))
   {
     dexed->keyup(inNumber);
+    voiceCount--;
+    if (voiceCount == 0) filterEnv.noteOff();
   }
 }
 
@@ -359,12 +375,22 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
       case CC_FILTER_RESO:
         effect_filter_resonance = inValue;
         // dexed->fx.Reso = inValueNorm;
+        masterFilter.resonance(0.7 + inValueNorm * 4.3);
+      #ifdef I2C_DISPLAY
+        handle_ui();
+        #endif
+        break;
+      case CC_FILTER_FREQUENCY:
+        effect_filter_cutoff = inValue;
+        filterModMixer.gain(0, inValueNorm);
+        // dexed->fx.Cutoff = inValueNorm;
         #ifdef I2C_DISPLAY
         handle_ui();
         #endif
         break;
-      case CC_FILTER_CUTOFF:
-        effect_filter_cutoff = inValue;
+      case CC_FILTER_ENV_MOD:
+        effect_filter_env_mod = inValue;
+        filterModMixer.gain(1, inValueNorm);
         // dexed->fx.Cutoff = inValueNorm;
         #ifdef I2C_DISPLAY
         handle_ui();
@@ -391,10 +417,12 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
         handle_ui();
         #endif
         break;
-      case CC_DELAY_FILTER_CUTOFF:
+      case CC_DELAY_FILTER_FREQUENCY:
+        effect_delay_filter_frequency = inValue;
         delayFilter.frequency(80 + sq(inValueNorm)*9920);
         break;
       case CC_DELAY_FILTER_RESO:
+      effect_delay_filter_resonance = inValue;
         delayFilter.resonance(0.7 + sq(inValueNorm)*0.7);
         break;
       case CC_PANIC:
@@ -617,7 +645,6 @@ bool checkMidiChannel(byte inChannel) {
   }
   else if (inChannel != configuration.midi_channel) {
     #ifdef DEBUG
-
     Serial.print(F("Ignoring MIDI data on channel "));
     Serial.print(inChannel);
     Serial.print(F("(listening on "));

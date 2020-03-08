@@ -9,14 +9,31 @@ AudioEffectDelay         delay1;
 #endif
 AudioFilterStateVariable delayFilter;
 
-AudioConnection          patchCord0(queue1, peak1);
-AudioConnection          patchCord1(queue1, 0, delayFbMixer, 0);
+AudioFilterStateVariable masterFilter;
+AudioEffectEnvelope      filterEnv;
+AudioSynthWaveformDc     dcOneVolt;
+AudioSynthWaveformDc     filterCutoff;
+AudioMixer4              filterModMixer;
+AudioMixer4              queueAmp;
+
+
+AudioConnection          patchCord70(dcOneVolt, 0, filterEnv, 0);
+AudioConnection          patchCord71(queue1, 0, queueAmp, 0);
+AudioConnection          patchCord72(queueAmp, 0, masterFilter, 0);
+AudioConnection          patchCord0(masterFilter, 0, peak1, 0);
+AudioConnection          patchCord73(dcOneVolt, 0, filterModMixer, 0);
+AudioConnection          patchCord74(filterEnv, 0, filterModMixer, 1);
+AudioConnection          patchCord75(filterModMixer, 0, masterFilter, 1);
+
+AudioConnection          patchCord1(masterFilter, 0, delayFbMixer, 0);
 AudioConnection          patchCord2(delayFbMixer, 0, delayFilter, 0);
 AudioConnection          patchCord3(delayFilter, 0, delay1, 0);
 AudioConnection          patchCord4(delay1, 0, delayFbMixer, 1);
 
-AudioConnection          patchCord5(queue1, 0, delayMixer, 0);
+
+AudioConnection          patchCord5(masterFilter, 0, delayMixer, 0);
 AudioConnection          patchCord6(delay1, 0, delayMixer, 1);
+
 
 #if defined(TEENSY_AUDIO_BOARD)
 AudioOutputI2S           i2s1;

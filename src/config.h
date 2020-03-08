@@ -48,9 +48,9 @@ Optimize: "Fastest + pure-code"
 //******************************************************************************
 //* DEXED AND EFECTS SETTINGS
 //#define DEXED_ENGINE DEXED_ENGINE_MODERN // DEXED_ENGINE_MARKI // DEXED_ENGINE_OPL
-#define DEXED_ENGINE DEXED_ENGINE_MARKI
+#define DEXED_ENGINE DEXED_ENGINE_MODERN
 // EFFECTS
-#define FILTER_MAX_FREQ 16000
+#define FILTER_MAX_FREQ 15000
 
 //******************************************************************************
 //* AUDIO SETTINGS
@@ -74,7 +74,7 @@ Optimize: "Fastest + pure-code"
 #define REDUCE_LOUDNESS 1
 #endif
 #define SAMPLE_RATE 44100
-#define SOFTEN_VALUE_CHANGE_STEPS 20 //seb TODO: check what this is
+#define SOFTEN_VALUE_CHANGE_STEPS 20 //seb TODO: check upstream what this is
 #define NORMALIZE_DX_VELOCITY 1
 
 //******************************************************************************

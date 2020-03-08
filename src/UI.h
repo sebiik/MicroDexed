@@ -51,9 +51,12 @@ extern void set_volume(float v, float pan);
 extern elapsedMillis autostore;
 extern elapsedMillis long_button_pressed;
 extern uint8_t effect_filter_cutoff;
+extern uint8_t effect_filter_env_mod;
 extern uint8_t effect_filter_resonance;
 extern uint8_t effect_delay_time;
 extern uint8_t effect_delay_feedback;
+extern uint8_t effect_delay_filter_frequency;
+extern uint8_t effect_delay_filter_resonance;
 extern uint8_t effect_delay_volume;
 extern bool effect_delay_sync;
 
