@@ -24,6 +24,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 #include <math.h>
 #include "PluginFx.h"
 
+
 const float dc = 1e-18;
 
 inline static float tptpc(float& state, float inp, float cutoff) {

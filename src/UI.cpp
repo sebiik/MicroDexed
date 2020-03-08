@@ -265,7 +265,7 @@ void handle_ui(void) {
             else if (enc[i].read() > ENC_FILTER_RES_STEPS)
               enc[i].write(ENC_FILTER_RES_STEPS);
             effect_filter_resonance = enc[i].read();
-            dexed->fx.Reso = 1.0 - float(effect_filter_resonance) / ENC_FILTER_RES_STEPS;
+            // dexed->fx.Reso = 1.0 - float(effect_filter_resonance) / ENC_FILTER_RES_STEPS;
             #ifdef DEBUG
             Serial.print(F("Setting filter resonance to: "));
             Serial.println(1.0 - float(effect_filter_resonance) / ENC_FILTER_RES_STEPS, 5);
@@ -277,7 +277,7 @@ void handle_ui(void) {
             else if (enc[i].read() > ENC_FILTER_CUT_STEPS)
               enc[i].write(ENC_FILTER_CUT_STEPS);
             effect_filter_cutoff = enc[i].read();
-            dexed->fx.Cutoff = 1.0 - float(effect_filter_cutoff) / ENC_FILTER_CUT_STEPS;
+            // dexed->fx.Cutoff = 1.0 - float(effect_filter_cutoff) / ENC_FILTER_CUT_STEPS;
             #ifdef DEBUG
             Serial.print(F("Setting filter cutoff to: "));
             Serial.println(1.0 - float(effect_filter_cutoff) / ENC_FILTER_CUT_STEPS, 5);

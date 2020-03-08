@@ -10,7 +10,7 @@
 #include <limits.h>
 #include "dexed.h"
 #include "dexed_sysex.h"
-#include "PluginFx.h"
+// #include "PluginFx.h"
 
 #ifdef I2C_DISPLAY
 #include "UI.h"
@@ -80,14 +80,14 @@ void setup() {
   sgtl5000_1.unmuteHeadphone();
   sgtl5000_1.unmuteLineout();
   sgtl5000_1.autoVolumeDisable(); // turn off AGC
-  sgtl5000_1.volume(0.5,0.5); // Headphone volume
+  sgtl5000_1.volume(0.6,0.6); // Headphone volume
   sgtl5000_1.lineOutLevel(SGTL5000_LINEOUT_LEVEL);
   sgtl5000_1.audioPostProcessorEnable();
   sgtl5000_1.autoVolumeControl(1, 1, 1, 0.9, 0.01, 0.05);
   sgtl5000_1.autoVolumeEnable();
   //sgtl5000_1.enhanceBass(lr_lev, bass_lev, hpf_bypass, cutoff);
-  sgtl5000_1.enhanceBass(1.0, 0.2, 1, 2); // //seb Configures the bass enhancement by setting the levels of the original stereo signal and the bass-enhanced mono level which will be mixed together. The high-pass filter may be enabled (0) or bypassed (1).
   sgtl5000_1.enhanceBassEnable();
+  sgtl5000_1.enhanceBass(1.0, 0.2, 1, 2); // //seb Configures the bass enhancement by setting the levels of the original stereo signal and the bass-enhanced mono level which will be mixed together. The high-pass filter may be enabled (0) or bypassed (1).
   //sgtl5000_1.eqBands(bass, mid_bass, midrange, mid_treble, treble);
   Serial.println(F("Teensy Audio Board enabled."));
   #elif defined(TGA_AUDIO_BOARD)
@@ -147,9 +147,9 @@ void setup() {
     delayFbMixer.gain(WET_SIGNAL, mapfloat(effect_delay_feedback, 0, ENC_DELAY_FB_STEPS, 0.0, 1.0)); // amount of feedback
     delayMixer.gain(DRY_SIGNAL, 1.0);
     delayMixer.gain(WET_SIGNAL, mapfloat(effect_delay_volume, 0, ENC_DELAY_VOLUME_STEPS, 0.0, 1.0)); // delayed signal (including feedback)
-    dexed->fx.Gain =  1.0;
-    dexed->fx.Reso = 1.0 - float(effect_filter_resonance) / ENC_FILTER_RES_STEPS;
-    dexed->fx.Cutoff = 1.0 - float(effect_filter_cutoff) / ENC_FILTER_CUT_STEPS;
+    // dexed->fx.Gain =  1.0;
+    // dexed->fx.Reso = 1.0;// - float(effect_filter_resonance) / ENC_FILTER_RES_STEPS;
+    // dexed->fx.Cutoff = 0.5;// - float(effect_filter_cutoff) / ENC_FILTER_CUT_STEPS;
 
     // load default SYSEX data
     load_sysex(configuration.bank, configuration.voice);
@@ -358,14 +358,14 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
         break;
       case CC_FILTER_RESO:
         effect_filter_resonance = inValue;
-        dexed->fx.Reso = inValueNorm;
+        // dexed->fx.Reso = inValueNorm;
         #ifdef I2C_DISPLAY
         handle_ui();
         #endif
         break;
       case CC_FILTER_CUTOFF:
         effect_filter_cutoff = inValue;
-        dexed->fx.Cutoff = inValueNorm;
+        // dexed->fx.Cutoff = inValueNorm;
         #ifdef I2C_DISPLAY
         handle_ui();
         #endif
@@ -689,7 +689,7 @@ void initial_values_from_eeprom(void) {
     eeprom_update();
   } else {
     EEPROM_readAnything(EEPROM_START_ADDRESS, configuration);
-    Serial.print(F(" - OK, loading!"));
+    Serial.print(F(" - OK, loading!\n"));
   }
   #ifdef DEBUG
   Serial.println();
@@ -765,6 +765,7 @@ void show_patch(void) {
 
   memset(voicename, 0, sizeof(voicename));
   for (i = 0; i < 6; i++) {
+    Serial.println();
     Serial.print(F("OP"));
     Serial.print(6 - i, DEC);
     Serial.println(F(": "));

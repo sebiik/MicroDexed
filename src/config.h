@@ -20,23 +20,20 @@ Optimize: "Fastest + pure-code"
 
 // MIDI
 #define MIDI_DEVICE_DIN Serial1
-#define MIDI_DEVICE_USB 1
+// #define MIDI_DEVICE_USB 1
 // #define MIDI_DEVICE_USB_HOST 1
 #define MIDI_DEVICE_NUMBER 0
 
 // AUDIO
 // If nothing is defined PT8211 is used as audio output device!
 #define TEENSY_AUDIO_BOARD 1
+// If the Teensy Audio Board is equipped with an 23LC1024 RAM chip, use it for the delay
+#define EXTERNAL_DELAY_RAM 1 //seb
+
 //#define TGA_AUDIO_BOARD
 
 // Left and right channel audio signal is presented on pins A21 and A22.
 // #define TEENSY_DAC
-
-// If the Teensy Audio Board is equipped with an 23LC1024 RAM chip, use it for the delay
-// #define EXTERNAL_DELAY_RAM 1 //seb
-
-//TODO: add freeverb option
-// #define USE_REVERB 1
 
 
 //******************************************************************************
@@ -88,24 +85,26 @@ Optimize: "Fastest + pure-code"
 
 //******************************************************************************
 //* DEBUG OUTPUT SETTINGS
-#define DEBUG 1
+// #define DEBUG 1
 #define SERIAL_SPEED 9600
 #define SHOW_XRUN 1
 #define SHOW_CPU_LOAD_MSEC 5000
 
 //******************************************************************************
 //* HARDWARE SETTINGS
-// Teensy Audio Shield:
+#define SGTL5000_LINEOUT_LEVEL 29
+
+// SD card on Teensy Audio Shield:
 //#define SDCARD_CS_PIN    10
 #define SDCARD_MOSI_PIN  7
 #define SDCARD_SCK_PIN   14
-#define SGTL5000_LINEOUT_LEVEL 29
+
 // Teensy 3.5 & 3.6 SD card
 #define SDCARD_CS_PIN    BUILTIN_SDCARD
 // #define SDCARD_MOSI_PIN  11  // not actually used
 // #define SDCARD_SCK_PIN   13  // not actually used
 
-// Encoder with button
+/* Encoders, buttons settings */
 #define ENC_VOL_STEPS 127
 #define ENC_FILTER_RES_STEPS 127
 #define ENC_FILTER_CUT_STEPS 127
@@ -142,6 +141,7 @@ Optimize: "Fastest + pure-code"
 #define BANK_NAME_LEN 13 // FAT12 filenames (plus '\0')
 #define VOICE_NAME_LEN 11 // 10 (plus '\0')
 
+
 //******************************************************************************
 //* DO NO CHANGE ANYTHING BEYOND IF YOU DON'T KNOW WHAT YOU ARE DOING !!!
 // MIDI
@@ -155,7 +155,7 @@ Optimize: "Fastest + pure-code"
 #else
 // Teensy-3.5 settings
 #undef MIDI_DEVICE_USB_HOST
-#define MAX_NOTES 12
+#define MAX_NOTES 8
 #endif
 #define TRANSPOSE_FIX 24
 
