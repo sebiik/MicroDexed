@@ -73,19 +73,14 @@ void setup() {
   AudioMemory(AUDIO_MEM);
 
   #ifdef TEENSY_AUDIO_BOARD
-  sgtl5000_1.enable();
-  //sgtl5000_1.dacVolumeRamp();
-  sgtl5000_1.dacVolumeRampLinear();
-  //sgtl5000_1.dacVolumeRampDisable();
-  sgtl5000_1.unmuteHeadphone();
-  sgtl5000_1.unmuteLineout();
+  sgtl5000_1.enable(); sgtl5000_1.dacVolumeRampLinear();
+  sgtl5000_1.unmuteHeadphone(); sgtl5000_1.unmuteLineout();
   sgtl5000_1.autoVolumeDisable(); // turn off AGC
   sgtl5000_1.volume(0.6,0.6); // Headphone volume
   sgtl5000_1.lineOutLevel(SGTL5000_LINEOUT_LEVEL);
   sgtl5000_1.audioPostProcessorEnable();
   sgtl5000_1.autoVolumeControl(1, 1, 1, 0.9, 0.01, 0.05);
   sgtl5000_1.autoVolumeEnable();
-  //sgtl5000_1.enhanceBass(lr_lev, bass_lev, hpf_bypass, cutoff);
   sgtl5000_1.enhanceBassEnable();
   sgtl5000_1.enhanceBass(1.0, 0.2, 1, 2); // //seb Configures the bass enhancement by setting the levels of the original stereo signal and the bass-enhanced mono level which will be mixed together. The high-pass filter may be enabled (0) or bypassed (1).
   //sgtl5000_1.eqBands(bass, mid_bass, midrange, mid_treble, treble);
@@ -161,7 +156,7 @@ void setup() {
     filterEnv.releaseNoteOn(1);
     filterEnv.attack(0.1);
     filterEnv.decay(500);
-    filterEnv.sustain(1);
+    filterEnv.sustain(0.5);
     filterEnv.release(10000);
     // load default SYSEX data
     load_sysex(configuration.bank, configuration.voice);
@@ -328,18 +323,15 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
     float inValueNorm = inValue * DIV127;
     switch (inCtrl) {
       case CC_BANK_SELECT:
-      case CC_BANK_SELECT_LSB: // BankSelect LSB
+      case CC_BANK_SELECT_LSB:
         if (inValue < MAX_BANKS) {
           configuration.bank = inValue;
+          load_sysex(configuration.bank, configuration.voice);
           #ifdef I2C_DISPLAY
           handle_ui();
+          ui_show_main();
           #endif
         }
-        #ifdef DEBUG
-        else {
-          Serial.print(F("Bank does not exist"));
-        }
-        #endif
         break;
       case CC_MOD_WHEEL:
         dexed->controllers.modwheel_cc = inValue;
@@ -353,11 +345,11 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
         dexed->controllers.foot_cc = inValue;
         dexed->controllers.refresh();
         break;
-      case CC_VOLUME: // Volume
+      case CC_VOLUME:
         configuration.vol = inValueNorm;
         set_volume(configuration.vol, configuration.pan);
         break;
-      case CC_PAN: // Pan
+      case CC_PAN:
         configuration.pan = float(inValue) / 128;
         set_volume(configuration.vol, configuration.pan);
         break;
@@ -376,7 +368,7 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
         effect_filter_resonance = inValue;
         // dexed->fx.Reso = inValueNorm;
         masterFilter.resonance(0.7 + inValueNorm * 4.3);
-      #ifdef I2C_DISPLAY
+        #ifdef I2C_DISPLAY
         handle_ui();
         #endif
         break;
@@ -397,15 +389,15 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
         #endif
         break;
       case CC_DELAY_TIME:
-        effect_delay_time = map(inValue, 0, 127, 0, ENC_DELAY_TIME_STEPS);
-        delay1.delay(0, mapfloat(effect_delay_time, 0, ENC_DELAY_TIME_STEPS, 0.0, DELAY_MAX_TIME));
+        effect_delay_time = inValue;
+        delay1.delay(0, (10 + inValueNorm * (DELAY_MAX_TIME-10)));
         #ifdef I2C_DISPLAY
         handle_ui();
         #endif
         break;
       case CC_DELAY_FEEDBACK:
-        effect_delay_feedback = map(inValue, 0, 127, 0, ENC_DELAY_FB_STEPS);
-        delayFbMixer.gain(1, mapfloat(float(effect_delay_feedback), 0, ENC_DELAY_FB_STEPS, 0.0, 1.0));
+        effect_delay_feedback = inValue;
+        delayFbMixer.gain(1, inValueNorm*0.85);
         #ifdef I2C_DISPLAY
         handle_ui();
         #endif
@@ -423,16 +415,20 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
         break;
       case CC_DELAY_FILTER_RESO:
       effect_delay_filter_resonance = inValue;
-        delayFilter.resonance(0.7 + sq(inValueNorm)*0.7);
+        delayFilter.resonance(0.7 + sq(inValueNorm)*0.3);
         break;
       case CC_PANIC:
         dexed->panic();
+        filterEnv.noteOff();
+        voiceCount = 0;
         break;
       case CC_RESET_CONTROLLERS:
         dexed->resetControllers();
         break;
       case CC_NOTES_OFF:
         dexed->notesOff();
+        filterEnv.noteOff();
+        voiceCount = 0;
         break;
       case CC_SET_MONO_MODE:
         dexed->setMonoMode(true);
@@ -456,9 +452,11 @@ void handlePitchBend(byte inChannel, int inPitch) {
 void handleProgramChange(byte inChannel, byte inProgram) {
   if (inProgram < MAX_VOICES)
   {
-    load_sysex(configuration.bank, inProgram);
+    configuration.voice = inProgram;
+    load_sysex(configuration.bank, configuration.voice);
     #ifdef I2C_DISPLAY
     handle_ui();
+    ui_show_main();
     #endif
   }
 }
@@ -656,6 +654,7 @@ bool checkMidiChannel(byte inChannel) {
   return (true);
 }
 
+
 /* VOLUME HELPER */
 void set_volume(float v, float p) {
   configuration.vol = v;
@@ -685,6 +684,7 @@ void set_volume(float v, float p) {
   volume_l.gain(cosf(p * PI / 2));
   #endif
 }
+
 
 // https://www.dr-lex.be/info-stuff/volumecontrols.html#table1
 inline float logvol(float x) {
@@ -753,6 +753,7 @@ uint32_t crc32(byte * calc_start, uint16_t calc_bytes) {
 
   return (crc);
 }
+
 
 /* DEBUG HELPER */
 #if defined (DEBUG) && defined (SHOW_CPU_LOAD_MSEC)

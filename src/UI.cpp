@@ -1,26 +1,3 @@
-/*
-MicroDexed
-
-MicroDexed is a port of the Dexed sound engine
-(https://github.com/asb2m10/dexed) for the Teensy-3.5/3.6 with audio shield.
-Dexed ist heavily based on https://github.com/google/music-synthesizer-for-android
-
-(c)2018,2019 H. Wirtz <wirtz@parasitstudio.de>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software Foundation,
-Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
-*/
 
 #include <Arduino.h>
 #include <limits.h>
@@ -34,7 +11,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 elapsedMillis ui_back_to_main;
 
 
-
 void handle_ui(void) {
   if (ui_back_to_main >= UI_AUTO_BACK_MS && (ui_state != UI_MAIN && ui_state != UI_EFFECTS_FILTER && ui_state != UI_EFFECTS_DELAY)) {
     enc[0].write(map(configuration.vol * 100, 0, 100, 0, ENC_VOL_STEPS));
@@ -46,10 +22,10 @@ void handle_ui(void) {
     ui_show_main();
     switch (ui_main_state) {
       case UI_MAIN_VOICE_SELECTED:
-      ui_main_state = UI_MAIN_VOICE;
-      break;
-      case UI_MAIN_BANK_SELECTED:
-      ui_main_state = UI_MAIN_BANK;
+        ui_main_state = UI_MAIN_VOICE;
+        break;
+        case UI_MAIN_BANK_SELECTED:
+        ui_main_state = UI_MAIN_BANK;
       break;
     }
   }
@@ -346,41 +322,35 @@ void handle_ui(void) {
 }
 
 void ui_show_main(void) {
-  if (ui_state != UI_MAIN) {
-    lcd.clear();
-  }
-
-  lcd.print(configuration.bank);//lcd.show(0, 0, 2, configuration.bank);
-  //lcd.show(0, 2, 1, " ");
-  strip_extension(bank_names[configuration.bank], bank_name);
-
-  if (ui_main_state == UI_MAIN_BANK || ui_main_state == UI_MAIN_BANK_SELECTED) {
-    lcd.setCursor(2, 0);
-    lcd.write("[");//lcd.show(0, 2, 1, "[");
-    lcd.write(bank_name);//lcd.show(0, 3, 8, bank_name);
-    lcd.write("]");//lcd.show(0, 11, 1, "]");
-  } else {
-    //lcd.show(0, 2, 1, " ");
-    lcd.setCursor(2, 0);
-    lcd.write(" ");
-    lcd.write(bank_name);//lcd.show(0, 3, 8, bank_name);
-    lcd.write(" ");//lcd.show(0, 11, 1, " ");
-  }
+  if (ui_state != UI_MAIN) lcd.clear();
 
   lcd.setCursor(0, 1);
-  //seb don't add 1 to configuration voice so programs are from 0 to 31, just personal preference
-  lcd.print(configuration.voice);//lcd.show(1, 0, 2, configuration.voice + 1);
-  //lcd.show(1, 2, 1, " ");
-  if (ui_main_state == UI_MAIN_VOICE || ui_main_state == UI_MAIN_VOICE_SELECTED) {
-    lcd.setCursor(2, 1);
-    lcd.write("[");//lcd.show(1, 2, 1, "[");
-    lcd.write(voice_names[configuration.voice]);//lcd.show(1, 3, 10, voice_names[configuration.voice]);
-    lcd.write("]");//lcd.show(1, 14, 1, "]");
-  } else {
-    //lcd.show(1, 2, 1, " ");
+  strip_extension(bank_names[configuration.bank], bank_name);
+  lcd.print(configuration.bank);
+  if (ui_main_state == UI_MAIN_BANK || ui_main_state == UI_MAIN_BANK_SELECTED) {
     lcd.setCursor(3, 1);
-    lcd.write(voice_names[configuration.voice]);//lcd.show(1, 3, 10, voice_names[configuration.voice]);
-    //lcd.show(1, 14, 1, " ");
+    lcd.write("[");
+    lcd.print(bank_name);
+    lcd.write("]");
+  }
+  else {
+    lcd.setCursor(3, 1);
+    lcd.write(" ");
+    lcd.print(bank_name);
+    lcd.write(" ");
+  }
+
+  lcd.setCursor(0, 0);
+  lcd.print(configuration.voice);
+  if (ui_main_state == UI_MAIN_VOICE || ui_main_state == UI_MAIN_VOICE_SELECTED) {
+    lcd.setCursor(3, 0);
+    lcd.write("[");
+    lcd.print(voice_names[configuration.voice]);
+    lcd.write("]");
+  }
+  else {
+    lcd.setCursor(4, 0);
+    lcd.print(voice_names[configuration.voice]);
   }
 
   ui_state = UI_MAIN;

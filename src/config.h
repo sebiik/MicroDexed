@@ -29,6 +29,9 @@ Optimize: "Fastest + pure-code"
 #define TEENSY_AUDIO_BOARD 1
 // If the Teensy Audio Board is equipped with an 23LC1024 RAM chip, use it for the delay
 #define EXTERNAL_DELAY_RAM 1 //seb
+#ifdef EXTERNAL_DELAY_RAM
+#define DELAY_MAX_TIME 1500.0
+#endif
 
 //#define TGA_AUDIO_BOARD
 
@@ -62,7 +65,7 @@ Optimize: "Fastest + pure-code"
 #else
 #define AUDIO_MEM 225
 #endif
-#define DELAY_MAX_TIME 600.0
+// #define DELAY_MAX_TIME 600.0
 #define REDUCE_LOUDNESS 1
 #else
 #if AUDIO_BLOCK_SAMPLES == 64
@@ -70,7 +73,7 @@ Optimize: "Fastest + pure-code"
 #else
 #define AUDIO_MEM 450
 #endif
-#define DELAY_MAX_TIME 1200.0
+// #define DELAY_MAX_TIME 1200.0
 #define REDUCE_LOUDNESS 1
 #endif
 #define SAMPLE_RATE 44100
@@ -85,7 +88,7 @@ Optimize: "Fastest + pure-code"
 
 //******************************************************************************
 //* DEBUG OUTPUT SETTINGS
-// #define DEBUG 1
+#define DEBUG 1
 #define SERIAL_SPEED 9600
 #define SHOW_XRUN 1
 #define SHOW_CPU_LOAD_MSEC 5000

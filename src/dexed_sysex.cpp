@@ -32,8 +32,7 @@
 #include "config.h"
 #include "UI.h"
 
-void create_sysex_filename(uint8_t b, char* sysex_file_name)
-{
+void create_sysex_filename(uint8_t b, char* sysex_file_name) {
   // init and set name for actual bank
   memset(sysex_file_name, 0, 4 + VOICE_NAME_LEN);
   sysex_file_name[0] = '/';
@@ -51,8 +50,7 @@ void create_sysex_filename(uint8_t b, char* sysex_file_name)
 #endif
 }
 
-void strip_extension(char* s, char* target)
-{
+void strip_extension(char* s, char* target) {
   char tmp[BANK_NAME_LEN];
   char* token;
 
@@ -64,8 +62,7 @@ void strip_extension(char* s, char* target)
     strcpy(target, token);
 }
 
-bool get_voice_names_from_bank(uint8_t b)
-{
+bool get_voice_names_from_bank(uint8_t b) {
   File sysex;
   uint8_t voice_counter = 0;
   int32_t bulk_checksum_calc = 0;
@@ -173,8 +170,7 @@ bool get_voice_names_from_bank(uint8_t b)
   return (false);
 }
 
-uint8_t get_bank_names(void)
-{
+uint8_t get_bank_names(void) {
   File root;
   uint8_t bank_counter = 0;
 
@@ -217,11 +213,10 @@ uint8_t get_bank_names(void)
     return (bank_counter);
 }
 
-bool load_sysex(uint8_t b, uint8_t v)
-{
-#if DEBUG
+bool load_sysex(uint8_t b, uint8_t v) {
+  #if DEBUG
   bool found = false;
-#endif
+  #endif
   v %= MAX_VOICES;
   b %= MAX_BANKS;
 
@@ -236,17 +231,17 @@ bool load_sysex(uint8_t b, uint8_t v)
     sysex = SD.open(sysex_file_name);
     if (!sysex)
     {
-#ifdef DEBUG
+      #ifdef DEBUG
       Serial.print(F("E : Cannot open "));
       Serial.print(sysex_file_name);
       Serial.println(F("from SD."));
-#endif
+      #endif
       return (false);
     }
 
     if (get_sysex_voice(sysex, v, data))
     {
-#ifdef DEBUG
+      #ifdef DEBUG
       char n[11];
 
       strncpy(n, (char*)&data[118], 10);
@@ -255,24 +250,23 @@ bool load_sysex(uint8_t b, uint8_t v)
       Serial.print(F(" ["));
       Serial.print(voice_names[v]);
       Serial.println(F("]"));
-#endif
+      #endif
       return (dexed->loadSysexVoice(data));
     }
-#ifdef DEBUG
+    #ifdef DEBUG
     else
-      Serial.println(F("E : Cannot load voice data"));
-#endif
+    Serial.println(F("E : Cannot load voice data"));
+    #endif
   }
-#ifdef DEBUG
+  #ifdef DEBUG
   if (found == false)
-    Serial.println(F("E : File not found."));
-#endif
+  Serial.println(F("E : File not found."));
+  #endif
 
   return (false);
 }
 
-bool get_sysex_voice(File sysex, uint8_t voice_number, uint8_t* data)
-{
+bool get_sysex_voice(File sysex, uint8_t voice_number, uint8_t* data) {
   uint16_t n;
   int32_t bulk_checksum_calc = 0;
   int8_t bulk_checksum;
