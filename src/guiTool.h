@@ -8,6 +8,7 @@ AudioEffectDelayExternal delay1;
 AudioEffectDelay         delay1;
 #endif
 AudioFilterStateVariable delayFilter;
+AudioEffectWaveshaper    waveshape1;
 
 AudioFilterStateVariable masterFilter;
 AudioEffectEnvelope      filterEnv;
@@ -26,7 +27,9 @@ AudioConnection          patchCord74(filterEnv, 0, filterModMixer, 1);
 AudioConnection          patchCord75(filterModMixer, 0, masterFilter, 1);
 
 AudioConnection          patchCord1(masterFilter, 0, delayFbMixer, 0);
-AudioConnection          patchCord2(delayFbMixer, 0, delayFilter, 0);
+// AudioConnection          patchCord2(delayFbMixer, 0, delayFilter, 0);
+AudioConnection          patchCord212(delayFbMixer, 0, waveshape1, 0);
+AudioConnection          patchCord303(waveshape1, 0, delayFilter, 0);
 AudioConnection          patchCord3(delayFilter, 0, delay1, 0);
 AudioConnection          patchCord4(delay1, 0, delayFbMixer, 1);
 

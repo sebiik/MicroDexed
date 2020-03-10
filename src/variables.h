@@ -52,3 +52,14 @@ config_t configuration = {0xffff, 0, 0, VOLUME, 0.5f, DEFAULT_MIDI_CHANNEL};
 bool eeprom_update_flag = false;
 const float DIV127 = (1.0 / 127.0);
 uint8_t voiceCount = 0;
+float waveshape[9] = {
+  -0.785398163397448,
+  -0.643501108793284,
+  -0.463647609000806,
+  -0.244978663126864,
+  0,
+  0.244978663126864,
+  0.463647609000806,
+  0.643501108793284,
+  0.785398163397448
+};

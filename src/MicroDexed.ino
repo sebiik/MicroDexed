@@ -29,7 +29,6 @@
 
 /******************************** Setup ********************************/
 void setup() {
-
   //while (!Serial) ; // wait for Arduino Serial Monitor
   Serial.begin(SERIAL_SPEED);
 
@@ -146,6 +145,7 @@ void setup() {
     // dexed->fx.Reso = 1.0;// - float(effect_filter_resonance) / ENC_FILTER_RES_STEPS;
     // dexed->fx.Cutoff = 0.5;// - float(effect_filter_cutoff) / ENC_FILTER_CUT_STEPS;
 
+    waveshape1.shape(waveshape,9);
     queueAmp.gain(0, 0.5);
     dcOneVolt.amplitude(1.0);
     masterFilter.octaveControl(7);
@@ -326,6 +326,7 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
       case CC_BANK_SELECT_LSB:
         if (inValue < MAX_BANKS) {
           configuration.bank = inValue;
+          get_voice_names_from_bank(configuration.bank);
           load_sysex(configuration.bank, configuration.voice);
           #ifdef I2C_DISPLAY
           handle_ui();
@@ -367,7 +368,7 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
       case CC_FILTER_RESO:
         effect_filter_resonance = inValue;
         // dexed->fx.Reso = inValueNorm;
-        masterFilter.resonance(0.7 + inValueNorm * 4.3);
+        masterFilter.resonance(0.7 + inValueNorm * 4.7);
         #ifdef I2C_DISPLAY
         handle_ui();
         #endif
@@ -397,7 +398,7 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
         break;
       case CC_DELAY_FEEDBACK:
         effect_delay_feedback = inValue;
-        delayFbMixer.gain(1, inValueNorm*0.85);
+        delayFbMixer.gain(1, inValueNorm*0.872);
         #ifdef I2C_DISPLAY
         handle_ui();
         #endif
@@ -411,11 +412,11 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
         break;
       case CC_DELAY_FILTER_FREQUENCY:
         effect_delay_filter_frequency = inValue;
-        delayFilter.frequency(80 + sq(inValueNorm)*9920);
+        delayFilter.frequency(100 + sq(inValueNorm)*9900);
         break;
       case CC_DELAY_FILTER_RESO:
       effect_delay_filter_resonance = inValue;
-        delayFilter.resonance(0.7 + sq(inValueNorm)*0.3);
+        delayFilter.resonance(0.7 + sq(inValueNorm)*0.5);
         break;
       case CC_PANIC:
         dexed->panic();
@@ -431,10 +432,12 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
         voiceCount = 0;
         break;
       case CC_SET_MONO_MODE:
-        dexed->setMonoMode(true);
+        if (inValue > 63) dexed->setMonoMode(true);
+        else dexed->setMonoMode(false);
         break;
       case CC_SET_POLY_MODE:
-        dexed->setMonoMode(false);
+        if (inValue > 63) dexed->setMonoMode(false);
+        else dexed->setMonoMode(true);
         break;
     }
   }

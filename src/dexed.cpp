@@ -185,7 +185,7 @@ void Dexed::keydown(uint8_t pitch, uint8_t velo) {
   pitch += data[144] - 24;
 
   #if defined(NORMALIZE_DX_VELOCITY)
-  velo = ((float)velo) * 0.7874015; // 100/127
+  velo = float(velo) * 0.7874015; // 100/127
   #endif
 
   uint8_t note = currentNote;

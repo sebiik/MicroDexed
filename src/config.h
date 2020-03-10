@@ -89,7 +89,7 @@ Optimize: "Fastest + pure-code"
 //******************************************************************************
 //* DEBUG OUTPUT SETTINGS
 #define DEBUG 1
-#define SERIAL_SPEED 9600
+#define SERIAL_SPEED 38400
 #define SHOW_XRUN 1
 #define SHOW_CPU_LOAD_MSEC 5000
 
