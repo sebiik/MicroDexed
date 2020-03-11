@@ -1,3 +1,6 @@
+#ifndef DEFINES_H_INCLUDED
+#define DEFINES_H_INCLUDED
+
 /* MIDI CCs and parameter numbers*/
 #define CC_BANK_SELECT 0
 #define CC_MOD_WHEEL 1
@@ -24,3 +27,5 @@
 /* Helpers */
 #define DRY_SIGNAL 0
 #define WET_SIGNAL 1
+
+#endif // DEFINES_H_INCLUDED

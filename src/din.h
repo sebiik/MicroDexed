@@ -1,3 +1,6 @@
+#ifndef DIN_H_INCLUDED
+#define DIN_H_INCLUDED
+
 #define NUM_DIN_BUTTONS 3
 
 const uint8_t dinPinList[9] = {2, 3, 4, 5, 24, 25, 29, 28, 30};
@@ -71,3 +74,5 @@ void handle_myButtons(void) { //seb
     }
   }
 }
+
+#endif //DIN_H_INCLUDED

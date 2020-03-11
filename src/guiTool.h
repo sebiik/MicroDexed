@@ -1,3 +1,6 @@
+#ifndef GUITOOL_H_INCLUDED
+#define GUITOOL_H_INCLUDED
+
 AudioPlayQueue           queue1;
 AudioAnalyzePeak         peak1;
 AudioMixer4              delayFbMixer;
@@ -73,3 +76,5 @@ AudioConnection          patchCord11(volume_master, 0, volume_r, 0);
 AudioConnection          patchCord12(volume_l, 0, pt8211_1, 0);
 AudioConnection          patchCord13(volume_r, 0, pt8211_1, 1);
 #endif
+
+#endif //GUITOOL_H_INCLUDED

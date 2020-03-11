@@ -1,3 +1,6 @@
+#ifndef VARIABLES_H_INCLUDED
+#define VARIABLES_H_INCLUDED
+
 #ifdef I2C_DISPLAY
 hd44780_I2Clcd lcd;
 Encoder4 enc[2] = {
@@ -63,3 +66,5 @@ float waveshape[9] = {
   0.643501108793284,
   0.785398163397448
 };
+
+#endif //VARIABLES_H_INCLUDED

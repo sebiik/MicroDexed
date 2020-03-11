@@ -1,3 +1,6 @@
+#ifndef ADC_H_INCLUDED
+#define ADC_H_INCLUDED
+
 #define NUM_ADC_CHANNELS 8
 #define NUM_LAYERS 8
 #define NUM_CONTROLS (NUM_ADC_CHANNELS * NUM_LAYERS)
@@ -55,3 +58,5 @@ void updateCC(void) {
     }
   }
 }
+
+#endif /* ADC_H_INCLUDED */
