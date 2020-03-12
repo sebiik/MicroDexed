@@ -23,8 +23,9 @@
 #include "defines.h"
 #include "adc.h"
 #include "din.h"
-#include "guiTool.h"
 #include "variables.h"
+#include "effect_modulated_delay.h"
+#include "guiTool.h"
 
 
 /******************************** Setup ********************************/
@@ -42,19 +43,17 @@ void setup() {
   lcd.clear();
   lcd.display();
   lcd.home();
-  lcd.write("MicroDexed");
+  lcd.print(F("MicroDexed"));
   lcd.write(VERSION);
   lcd.setCursor(0, 1);
-  lcd.write("(c)parasiTstudio");
-  delay(1000);
-  lcd.setCursor(0, 1);
-  lcd.write("sebiiksbcs edit ");
+  lcd.print(F("sebiiksbcs edit "));
+  delay(500);
 
   pinMode(BUT_L_PIN, INPUT_PULLUP);
   pinMode(BUT_R_PIN, INPUT_PULLUP);
   #endif
 
-  delay(250);
+  delay(100);
   Serial.println(F("MicroDexed based on https://github.com/asb2m10/dexed"));
   Serial.println(F("(c)2018,2019 H. Wirtz <wirtz@parasitstudio.de>"));
   Serial.println(F("edited 2019,2020 by sebiiksbcs"));
@@ -75,26 +74,25 @@ void setup() {
   sgtl5000_1.enable(); sgtl5000_1.dacVolumeRampLinear();
   sgtl5000_1.unmuteHeadphone(); sgtl5000_1.unmuteLineout();
   sgtl5000_1.autoVolumeDisable(); // turn off AGC
-  sgtl5000_1.volume(0.6,0.6); // Headphone volume
+  sgtl5000_1.volume(0.8,0.8); // Headphone volume
   sgtl5000_1.lineOutLevel(SGTL5000_LINEOUT_LEVEL);
   sgtl5000_1.audioPostProcessorEnable();
   sgtl5000_1.autoVolumeControl(1, 1, 1, 0.9, 0.01, 0.05);
   sgtl5000_1.autoVolumeEnable();
   sgtl5000_1.enhanceBassEnable();
   sgtl5000_1.enhanceBass(1.0, 0.2, 1, 2); // //seb Configures the bass enhancement by setting the levels of the original stereo signal and the bass-enhanced mono level which will be mixed together. The high-pass filter may be enabled (0) or bypassed (1).
-  //sgtl5000_1.eqBands(bass, mid_bass, midrange, mid_treble, treble);
   Serial.println(F("Teensy Audio Board enabled."));
   #elif defined(TGA_AUDIO_BOARD)
-  wm8731_1.enable();
-  wm8731_1.volume(1.0);
-  Serial.println(F("TGA board enabled."));
+  // wm8731_1.enable();
+  // wm8731_1.volume(1.0);
+  // Serial.println(F("TGA board enabled."));
   #elif defined(TEENSY_DAC)
-  Serial.println(F("Internal DAC enabled."));
+  // Serial.println(F("Internal DAC enabled."));
   #elif defined(TEENSY_DAC_SYMMETRIC)
-  invMixer.gain(0,-1.f);
-  Serial.println(F("Internal DAC using symmetric outputs enabled."));
+  // invMixer.gain(0,-1.f);
+  // Serial.println(F("Internal DAC using symmetric outputs enabled."));
   #else
-  Serial.println(F("PT8211 enabled."));
+  // Serial.println(F("PT8211 enabled."));
   #endif
 
   set_volume(configuration.vol, configuration.pan);
@@ -135,18 +133,23 @@ void setup() {
 
     // Init effects
     delay1.delay(0, mapfloat(effect_delay_feedback, 0, ENC_DELAY_TIME_STEPS, 0.0, DELAY_MAX_TIME));
+    delay1.delay(1, mapfloat(effect_delay_feedback, 0, ENC_DELAY_TIME_STEPS, 0.0, DELAY_MAX_TIME)*0.6901);
+    delay1.delay(2, mapfloat(effect_delay_feedback, 0, ENC_DELAY_TIME_STEPS, 0.0, DELAY_MAX_TIME)*0.3450);
     delayFilter.frequency(3000);
     delayFilter.resonance(1.0);
     delayFbMixer.gain(DRY_SIGNAL, 1.0); // original signal
     delayFbMixer.gain(WET_SIGNAL, mapfloat(effect_delay_feedback, 0, ENC_DELAY_FB_STEPS, 0.0, 1.0)); // amount of feedback
+    delayFbMixer.gain(2,0); // additional feedback muted
+    delayFbMixer.gain(3,0); // additional feedback muted
     delayMixer.gain(DRY_SIGNAL, 1.0);
     delayMixer.gain(WET_SIGNAL, mapfloat(effect_delay_volume, 0, ENC_DELAY_VOLUME_STEPS, 0.0, 1.0)); // delayed signal (including feedback)
     // dexed->fx.Gain =  1.0;
     // dexed->fx.Reso = 1.0;// - float(effect_filter_resonance) / ENC_FILTER_RES_STEPS;
     // dexed->fx.Cutoff = 0.5;// - float(effect_filter_cutoff) / ENC_FILTER_CUT_STEPS;
 
-    waveshape1.shape(waveshape,9);
-    queueAmp.gain(0, 0.5);
+    queueWaveshaper.shape(waveshape,9);
+    delayWaveshaper.shape(waveshape,9);
+    // queueAmp.gain(0, 0.5);
     dcOneVolt.amplitude(1.0);
     masterFilter.octaveControl(7);
     masterFilter.frequency(40);
@@ -158,6 +161,20 @@ void setup() {
     filterEnv.decay(500);
     filterEnv.sustain(0.5);
     filterEnv.release(10000);
+
+    inverter.gain(0,-1.0);
+    chorus_l.begin(chorus_l_delayline, MOD_DELAY_SAMPLE_BUFFER);
+    chorus_r.begin(chorus_r_delayline, MOD_DELAY_SAMPLE_BUFFER);
+    modulator.begin(WAVEFORM_SINE);
+    modulator.frequency(0.5);
+    modulator.amplitude(0.25);
+    chorusFilter_r.setLowpass(0, MOD_FILTER_CUTOFF_HZ, 0.707);
+    chorusFilter_l.setLowpass(0, MOD_FILTER_CUTOFF_HZ, 0.707);
+    chorusMixer_l.gain(DRY_SIGNAL, 1.0);
+    chorusMixer_r.gain(DRY_SIGNAL, 1.0);
+    chorusMixer_l.gain(WET_SIGNAL, 0);
+    chorusMixer_r.gain(WET_SIGNAL, 0);
+
     // load default SYSEX data
     load_sysex(configuration.bank, configuration.voice);
   }
@@ -392,6 +409,7 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
       case CC_DELAY_TIME:
         effect_delay_time = inValue;
         delay1.delay(0, (10 + inValueNorm * (DELAY_MAX_TIME-10)));
+        delay1.delay(1, (40 + inValueNorm * (DELAY_MAX_TIME-10)-30));
         #ifdef I2C_DISPLAY
         handle_ui();
         #endif
@@ -412,14 +430,59 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
         break;
       case CC_DELAY_FILTER_FREQUENCY:
         effect_delay_filter_frequency = inValue;
-        delayFilter.frequency(100 + sq(inValueNorm)*9900);
+        delayFilter.frequency(100 + sq(inValueNorm)*9900); // TODO use log() instead of sq()
         break;
       case CC_DELAY_FILTER_RESO:
       effect_delay_filter_resonance = inValue;
         delayFilter.resonance(0.7 + sq(inValueNorm)*0.5);
         break;
+      case CC_CHORUS_RATE:
+        effect_chorus_rate = inValue;
+        modulator.frequency(0.01 + sq(inValueNorm) * 9.99);
+        break;
+      case CC_CHORUS_DEPTH:
+        effect_chorus_depth = inValue;
+        modulator.amplitude(0.01 + inValueNorm*0.99);
+        break;
+      case CC_CHORUS_WAVE:
+        effect_chorus_wave = inValue;
+        switch (inValue) {
+          case WAVEFORM_SINE:
+            modulator.begin(WAVEFORM_SINE);
+            break;
+          case WAVEFORM_SAWTOOTH:
+            modulator.begin(WAVEFORM_SAWTOOTH);
+            break;
+          case WAVEFORM_TRIANGLE:
+            modulator.begin(WAVEFORM_TRIANGLE);
+            break;
+          case WAVEFORM_SQUARE:
+            modulator.begin(WAVEFORM_SQUARE);
+            break;
+          case WAVEFORM_SAWTOOTH_REVERSE:
+            modulator.begin(WAVEFORM_SAWTOOTH_REVERSE);
+            break;
+        }
+        break;
+      case CC_CHORUS_ON:
+        effect_chorus_on = inValue;
+        if (inValue > 63) {
+          chorusMixer_l.gain(DRY_SIGNAL, 0);
+          chorusMixer_r.gain(DRY_SIGNAL, 0);
+          chorusMixer_l.gain(WET_SIGNAL, 1);
+          chorusMixer_r.gain(WET_SIGNAL, 1);
+        }
+        else {
+          chorusMixer_l.gain(DRY_SIGNAL, 1);
+          chorusMixer_r.gain(DRY_SIGNAL, 1);
+          chorusMixer_l.gain(WET_SIGNAL, 0);
+          chorusMixer_r.gain(WET_SIGNAL, 0);
+        }
+
+        break;
       case CC_PANIC:
         dexed->panic();
+        dexed->notesOff();
         filterEnv.noteOff();
         voiceCount = 0;
         break;

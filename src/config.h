@@ -18,6 +18,11 @@ Optimize: "Fastest + pure-code"
 //******************************************************************************
 //* DEVICE SETTINGS
 
+// #ifdef AUDIO_BLOCK_SAMPLES
+// #undef AUDIO_BLOCK_SAMPLES
+// #define AUDIO_BLOCK_SAMPLES 64
+// #endif
+
 // MIDI
 #define MIDI_DEVICE_DIN Serial1
 // #define MIDI_DEVICE_USB 1
@@ -44,16 +49,18 @@ Optimize: "Fastest + pure-code"
 
 // Midi channel 7 for DX-7.. easier to remember
 #define DEFAULT_MIDI_CHANNEL 7 //MIDI_CHANNEL_OMNI
-#define MIDI_MERGE_THRU 1
+// #define MIDI_MERGE_THRU 1
 #define DEFAULT_SYSEXBANK 0
 #define DEFAULT_SYSEXSOUND 0
 
 //******************************************************************************
 //* DEXED AND EFECTS SETTINGS
 //#define DEXED_ENGINE DEXED_ENGINE_MODERN // DEXED_ENGINE_MARKI // DEXED_ENGINE_OPL
-#define DEXED_ENGINE DEXED_ENGINE_MODERN
-// EFFECTS
-#define FILTER_MAX_FREQ 15000
+#define DEXED_ENGINE DEXED_ENGINE_MARKI
+
+// CHORUS parameters
+#define MOD_DELAY_SAMPLE_BUFFER 512//int32_t(TIME_MS2SAMPLES(30.0)) // 20.0 ms delay buffer.
+#define MOD_FILTER_CUTOFF_HZ 12000
 
 //******************************************************************************
 //* AUDIO SETTINGS
@@ -65,19 +72,18 @@ Optimize: "Fastest + pure-code"
 #else
 #define AUDIO_MEM 225
 #endif
-// #define DELAY_MAX_TIME 600.0
-#define REDUCE_LOUDNESS 1
+#define DELAY_MAX_TIME 600.0
+#define REDUCE_LOUDNESS_FACTOR 0.25
 #else
 #if AUDIO_BLOCK_SAMPLES == 64
 #define AUDIO_MEM 900
 #else
 #define AUDIO_MEM 450
 #endif
-// #define DELAY_MAX_TIME 1200.0
-#define REDUCE_LOUDNESS 1
+#define DELAY_MAX_TIME 1500.0
+#define REDUCE_LOUDNESS_FACTOR 0.25
 #endif
 #define SAMPLE_RATE 44100
-#define SOFTEN_VALUE_CHANGE_STEPS 20 //seb TODO: check upstream what this is
 #define NORMALIZE_DX_VELOCITY 1
 
 //******************************************************************************
@@ -88,7 +94,7 @@ Optimize: "Fastest + pure-code"
 
 //******************************************************************************
 //* DEBUG OUTPUT SETTINGS
-#define DEBUG 1
+// #define DEBUG 1
 #define SERIAL_SPEED 38400
 #define SHOW_XRUN 1
 #define SHOW_CPU_LOAD_MSEC 5000
@@ -145,6 +151,7 @@ Optimize: "Fastest + pure-code"
 #define VOICE_NAME_LEN 11 // 10 (plus '\0')
 
 
+
 //******************************************************************************
 //* DO NO CHANGE ANYTHING BEYOND IF YOU DON'T KNOW WHAT YOU ARE DOING !!!
 // MIDI
@@ -158,7 +165,7 @@ Optimize: "Fastest + pure-code"
 #else
 // Teensy-3.5 settings
 #undef MIDI_DEVICE_USB_HOST
-#define MAX_NOTES 8
+#define MAX_NOTES 6
 #endif
 #define TRANSPOSE_FIX 24
 
@@ -180,4 +187,9 @@ struct config_t {
   float pan;
   uint8_t midi_channel;
 };
+
+/* HELPER MACROS */
+#define TIME_MS2SAMPLES(x) floor(uint32_t(x) * AUDIO_SAMPLE_RATE / 1000)
+#define SAMPLES2TIME_MS(x) float(uint32_t(x) * 1000 / AUDIO_SAMPLE_RATE)
+
 #endif // CONFIG_H_INCLUDED

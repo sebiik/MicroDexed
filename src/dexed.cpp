@@ -152,7 +152,10 @@ void Dexed::getSamples(uint16_t n_samples, int16_t* buffer)
           int32_t clip_val = val < -(1 << 24) ? 0x8000 : val >= (1 << 24) ? 0x7fff : val >> 9;
 #endif
 
-          float f = static_cast<float>(clip_val >> REDUCE_LOUDNESS) / 0x7fff;
+          float f = static_cast<float>(clip_val) / 0x7fff;
+          #if defined(REDUCE_LOUDNESS_FACTOR)
+          f *= REDUCE_LOUDNESS_FACTOR;
+          #endif
           if (f > 1.0)
           {
             f = 1.0;

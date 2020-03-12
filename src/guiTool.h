@@ -11,40 +11,60 @@ AudioEffectDelayExternal delay1;
 AudioEffectDelay         delay1;
 #endif
 AudioFilterStateVariable delayFilter;
-AudioEffectWaveshaper    waveshape1;
+AudioEffectWaveshaper    queueWaveshaper;
+AudioEffectWaveshaper    delayWaveshaper;
 
 AudioFilterStateVariable masterFilter;
 AudioEffectEnvelope      filterEnv;
 AudioSynthWaveformDc     dcOneVolt;
 AudioSynthWaveformDc     filterCutoff;
 AudioMixer4              filterModMixer;
-AudioMixer4              queueAmp;
 
+AudioMixer4              chorusMixer_l;
+AudioMixer4              chorusMixer_r;
+AudioEffectModulatedDelay   chorus_r;
+AudioEffectModulatedDelay   chorus_l;
+AudioFilterBiquad        chorusFilter_r;
+AudioFilterBiquad        chorusFilter_l;
+AudioSynthWaveform       modulator;
+AudioMixer4              inverter;
 
 AudioConnection          patchCord70(dcOneVolt, 0, filterEnv, 0);
-AudioConnection          patchCord71(queue1, 0, queueAmp, 0);
-AudioConnection          patchCord72(queueAmp, 0, masterFilter, 0);
+AudioConnection          patchCord71(queue1, 0, queueWaveshaper, 0);
+AudioConnection          patchCord72(queueWaveshaper, 0, masterFilter, 0);
 AudioConnection          patchCord0(masterFilter, 0, peak1, 0);
 AudioConnection          patchCord73(dcOneVolt, 0, filterModMixer, 0);
 AudioConnection          patchCord74(filterEnv, 0, filterModMixer, 1);
 AudioConnection          patchCord75(filterModMixer, 0, masterFilter, 1);
 
 AudioConnection          patchCord1(masterFilter, 0, delayFbMixer, 0);
-// AudioConnection          patchCord2(delayFbMixer, 0, delayFilter, 0);
-AudioConnection          patchCord212(delayFbMixer, 0, waveshape1, 0);
-AudioConnection          patchCord303(waveshape1, 0, delayFilter, 0);
+AudioConnection          patchCord212(delayFbMixer, 0, delayWaveshaper, 0);
+AudioConnection          patchCord303(delayWaveshaper, 0, delayFilter, 0);
 AudioConnection          patchCord3(delayFilter, 0, delay1, 0);
-AudioConnection          patchCord4(delay1, 0, delayFbMixer, 1);
+AudioConnection          patchCord313(delay1, 0, delayFbMixer, 1);
+// additional delay taps
+AudioConnection          patchCord314(delay1, 1, delayFbMixer, 2);
+AudioConnection          patchCord315(delay1, 2, delayFbMixer, 3);
 
 
 AudioConnection          patchCord5(masterFilter, 0, delayMixer, 0);
 AudioConnection          patchCord6(delay1, 0, delayMixer, 1);
-
+AudioConnection          patchCord7(delayMixer, 0, chorus_l, 0);
+AudioConnection          patchCord8(delayMixer, 0, chorus_r, 0);
+AudioConnection          patchCord21(modulator, 0, chorus_l, 1);
+AudioConnection          patchCord22(modulator, inverter);
+AudioConnection          patchCord23(inverter, 0, chorus_r, 1);
+AudioConnection          patchCord9(chorus_l, 0, chorusFilter_l, 0);
+AudioConnection          patchCord10(chorus_r, 0, chorusFilter_r, 0);
+AudioConnection          patchCord297(delayMixer, 0, chorusMixer_l, 0);
+AudioConnection          patchCord298(delayMixer, 0, chorusMixer_r, 0);
+AudioConnection          patchCord11(chorusFilter_l, 0, chorusMixer_l, 1);
+AudioConnection          patchCord12(chorusFilter_r, 0, chorusMixer_r, 1);
 
 #if defined(TEENSY_AUDIO_BOARD)
 AudioOutputI2S           i2s1;
-AudioConnection          patchCord9(delayMixer, 0, i2s1, 0);
-AudioConnection          patchCord10(delayMixer, 0, i2s1, 1);
+AudioConnection          patchCord13(chorusMixer_l, 0, i2s1, 0);
+AudioConnection          patchCord14(chorusMixer_r, 0, i2s1, 1);
 AudioControlSGTL5000     sgtl5000_1;
 #elif defined(TGA_AUDIO_BOARD)
 AudioOutputI2S           i2s1;

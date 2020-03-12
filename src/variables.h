@@ -36,12 +36,12 @@ uint8_t midi_timing_counter = 0; // 24 per qarter
 elapsedMillis midi_timing_timestep;
 uint16_t midi_timing_quarter = 0;
 elapsedMillis long_button_pressed;
-uint8_t effect_filter_cutoff = 0;
+uint8_t effect_filter_cutoff = 127;
 uint8_t effect_filter_resonance = 0;
 uint8_t effect_filter_env_mod = 0;
 uint8_t effect_delay_time = 0;
 uint8_t effect_delay_feedback = 0;
-uint8_t effect_delay_filter_frequency = 0;
+uint8_t effect_delay_filter_frequency = 127;
 uint8_t effect_delay_filter_resonance = 0;
 uint8_t effect_delay_volume = 0;
 bool effect_delay_sync = 0;
@@ -55,16 +55,34 @@ config_t configuration = {0xffff, 0, 0, VOLUME, 0.5f, DEFAULT_MIDI_CHANNEL};
 bool eeprom_update_flag = false;
 const float DIV127 = (1.0 / 127.0);
 uint8_t voiceCount = 0;
+// float waveshape[9] = {
+//   -0.785398163397448,
+//   -0.643501108793284,
+//   -0.463647609000806,
+//   -0.244978663126864,
+//   0,
+//   0.244978663126864,
+//   0.463647609000806,
+//   0.643501108793284,
+//   0.785398163397448
+// };
 float waveshape[9] = {
-  -0.785398163397448,
-  -0.643501108793284,
-  -0.463647609000806,
-  -0.244978663126864,
+  -0.765398163397448,
+  -0.663501108793284,
+  -0.503647609000806,
+  -0.294978663126864,
   0,
-  0.244978663126864,
-  0.463647609000806,
-  0.643501108793284,
-  0.785398163397448
+  0.294978663126864,
+  0.503647609000806,
+  0.663501108793284,
+  0.765398163397448
 };
+short chorus_l_delayline[MOD_DELAY_SAMPLE_BUFFER];
+short chorus_r_delayline[MOD_DELAY_SAMPLE_BUFFER];
+uint8_t effect_chorus_rate;
+uint8_t effect_chorus_depth;
+uint8_t effect_chorus_wave;
+uint8_t effect_chorus_on;
+
 
 #endif //VARIABLES_H_INCLUDED
