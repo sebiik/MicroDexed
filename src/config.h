@@ -60,7 +60,7 @@ Optimize: "Fastest + pure-code"
 
 // CHORUS parameters
 #define MOD_DELAY_SAMPLE_BUFFER 512//int32_t(TIME_MS2SAMPLES(30.0)) // 20.0 ms delay buffer.
-#define MOD_FILTER_CUTOFF_HZ 12000
+#define MOD_FILTER_CUTOFF_HZ 8192
 
 //******************************************************************************
 //* AUDIO SETTINGS
