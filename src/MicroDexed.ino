@@ -598,13 +598,17 @@ void handleSystemExclusive(byte * sysex, uint len) {
     sysex[4] &= 0x7f;
     sysex[5] &= 0x7f;
 
+    #ifdef DEBUG
     uint8_t data_index;
+    #endif
 
     if (((sysex[3] & 0x7c) >> 2) == 0) {
       dexed->notesOff();
       dexed->data[sysex[4] + ((sysex[3] & 0x03) * 128)] = sysex[5]; // set parameter
       dexed->doRefreshVoice();
+      #ifdef DEBUG
       data_index = sysex[4] + ((sysex[3] & 0x03) * 128);
+      #endif
     } else {
       dexed->data[DEXED_GLOBAL_PARAMETER_OFFSET - 63 + sysex[4]] = sysex[5]; // set function parameter
       dexed->controllers.values_[kControllerPitchRange] = dexed->data[DEXED_GLOBAL_PARAMETER_OFFSET + DEXED_PITCHBEND_RANGE];
@@ -619,7 +623,9 @@ void handleSystemExclusive(byte * sysex, uint len) {
       dexed->controllers.at.setTarget(dexed->data[DEXED_GLOBAL_PARAMETER_OFFSET + DEXED_AT_ASSIGN]);
       dexed->controllers.masterTune = (dexed->data[DEXED_GLOBAL_PARAMETER_OFFSET + DEXED_MASTER_TUNE] * 0x4000 << 11) * (1.0 / 12);
       dexed->controllers.refresh();
+      #ifdef DEBUG
       data_index = DEXED_GLOBAL_PARAMETER_OFFSET - 63 + sysex[4];
+      #endif
     }
     #ifdef DEBUG
     Serial.print(F("SysEx"));
