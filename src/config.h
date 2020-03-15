@@ -18,10 +18,12 @@ Optimize: "Fastest + pure-code"
 //******************************************************************************
 //* DEVICE SETTINGS
 
-// #ifdef AUDIO_BLOCK_SAMPLES
-// #undef AUDIO_BLOCK_SAMPLES
-// #define AUDIO_BLOCK_SAMPLES 64
-// #endif
+//******************************************************************************
+//* DEBUG OUTPUT SETTINGS
+#define DEBUG 1
+#define SERIAL_SPEED 38400
+#define SHOW_XRUN 1
+#define SHOW_CPU_LOAD_MSEC 3000
 
 // MIDI
 #define MIDI_DEVICE_DIN Serial1
@@ -59,8 +61,8 @@ Optimize: "Fastest + pure-code"
 #define DEXED_ENGINE DEXED_ENGINE_MARKI
 
 // CHORUS parameters
-#define MOD_DELAY_SAMPLE_BUFFER 512//int32_t(TIME_MS2SAMPLES(30.0)) // 20.0 ms delay buffer.
-#define MOD_FILTER_CUTOFF_HZ 12000
+#define CHORUS_SAMPLE_BUFFER (2*AUDIO_BLOCK_SAMPLES)
+#define CHORUS_FILTER_CUTOFF_HZ 12000
 
 //******************************************************************************
 //* AUDIO SETTINGS
@@ -92,12 +94,6 @@ Optimize: "Fastest + pure-code"
 #define TIMER_UI_HANDLING_MS 64
 #define TIMER_UI_HANDLING_MS_ADC 16
 
-//******************************************************************************
-//* DEBUG OUTPUT SETTINGS
-// #define DEBUG 1
-#define SERIAL_SPEED 38400
-#define SHOW_XRUN 1
-#define SHOW_CPU_LOAD_MSEC 5000
 
 //******************************************************************************
 //* HARDWARE SETTINGS

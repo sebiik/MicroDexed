@@ -48,7 +48,6 @@ void handle_myButtons(void) { //seb
           case 1: // long press for myButton[1]
           break;
           case 2: // long press for myButton[2]
-          //TODO: enter load preset menu?
           break;
         }
       }

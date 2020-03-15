@@ -1,33 +1,35 @@
 #ifndef GUITOOL_H_INCLUDED
 #define GUITOOL_H_INCLUDED
 
-AudioPlayQueue           queue1;
-AudioAnalyzePeak         peak1;
-AudioMixer4              delayFbMixer;
-AudioMixer4              delayMixer;
+// #include "mixer2.h"
+
+AudioPlayQueue            queue1;
+AudioAnalyzePeak          peak1;
+AudioMixer2               delayFbMixer;
+AudioMixer2               delayMixer;
 #if defined(EXTERNAL_DELAY_RAM)
-AudioEffectDelayExternal delay1;
+AudioEffectDelayExternal  delay1;
 #else
-AudioEffectDelay         delay1;
+AudioEffectDelay          delay1;
 #endif
-AudioFilterStateVariable delayFilter;
-AudioEffectWaveshaper    queueWaveshaper;
-AudioEffectWaveshaper    delayWaveshaper;
+AudioFilterStateVariable  delayFilter;
+AudioEffectWaveshaper     queueWaveshaper;
+AudioEffectWaveshaper     delayWaveshaper;
 
-AudioFilterStateVariable masterFilter;
-AudioEffectEnvelope      filterEnv;
-AudioSynthWaveformDc     dcOneVolt;
-AudioSynthWaveformDc     filterCutoff;
-AudioMixer4              filterModMixer;
+AudioFilterStateVariable  masterFilter;
+AudioEffectEnvelope       filterEnv;
+AudioSynthWaveformDc      dcOneVolt;
+AudioSynthWaveformDc      filterCutoff;
+AudioMixer2               filterModMixer;
 
-AudioMixer4              chorusMixer_l;
-AudioMixer4              chorusMixer_r;
-AudioEffectModulatedDelay   chorus_r;
-AudioEffectModulatedDelay   chorus_l;
-AudioFilterBiquad        chorusFilter_r;
-AudioFilterBiquad        chorusFilter_l;
-AudioSynthWaveform       modulator;
-AudioMixer4              inverter;
+AudioEffectModulatedDelay chorus_l;
+AudioEffectModulatedDelay chorus_r;
+AudioMixer2               chorusMixer_l;
+AudioMixer2               chorusMixer_r;
+AudioFilterBiquad         chorusFilter_l;
+AudioFilterBiquad         chorusFilter_r;
+AudioSynthWaveform        modulator;
+AudioMixer2               inverter;
 
 AudioConnection          patchCord70(dcOneVolt, 0, filterEnv, 0);
 AudioConnection          patchCord71(queue1, 0, queueWaveshaper, 0);
@@ -43,8 +45,8 @@ AudioConnection          patchCord303(delayWaveshaper, 0, delayFilter, 0);
 AudioConnection          patchCord3(delayFilter, 0, delay1, 0);
 AudioConnection          patchCord313(delay1, 0, delayFbMixer, 1);
 // additional delay taps
-AudioConnection          patchCord314(delay1, 1, delayFbMixer, 2);
-AudioConnection          patchCord315(delay1, 2, delayFbMixer, 3);
+// AudioConnection          patchCord314(delay1, 1, delayFbMixer, 2);
+// AudioConnection          patchCord315(delay1, 2, delayFbMixer, 3);
 
 
 AudioConnection          patchCord5(masterFilter, 0, delayMixer, 0);

@@ -31,6 +31,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 #include <hd44780.h>
 #include <hd44780ioClass/hd44780_I2Clcd.h> // include i/o class header
 #include "Encoder4.h"
+#include "mixer2.h"
 
 #ifndef UI_H_INCLUDED
 #define UI_H_INCLUDED
@@ -66,8 +67,8 @@ extern AudioEffectDelayExternal delay1;
 extern AudioEffectDelay delay1;
 #endif
 
-extern AudioMixer4 delayFbMixer;
-extern AudioMixer4 delayMixer;
+extern AudioMixer2 delayFbMixer;
+extern AudioMixer2 delayMixer;
 
 void handle_ui(void);
 void ui_show_main(void);

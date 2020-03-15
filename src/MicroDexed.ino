@@ -12,6 +12,15 @@
 #include "dexed_sysex.h"
 // #include "PluginFx.h"
 
+
+/* TODO Equal power pan/dry-wet:
+dry = cos($valueNorm * 3.14159 / 2);
+wet = sin($valueNorm * 3.14159 / 2);
+*/
+
+// TODO follow codeberg continue from ffe25453d5
+
+
 #ifdef I2C_DISPLAY
 #include "UI.h"
 #include <Bounce.h>
@@ -23,8 +32,9 @@
 #include "defines.h"
 #include "adc.h"
 #include "din.h"
-#include "variables.h"
+#include "mixer2.h"
 #include "effect_modulated_delay.h"
+#include "variables.h"
 #include "guiTool.h"
 
 
@@ -131,49 +141,7 @@ void setup() {
     }
     #endif
 
-    // Init effects
-    delay1.delay(0, mapfloat(effect_delay_feedback, 0, ENC_DELAY_TIME_STEPS, 0.0, DELAY_MAX_TIME));
-    delay1.delay(1, mapfloat(effect_delay_feedback, 0, ENC_DELAY_TIME_STEPS, 0.0, DELAY_MAX_TIME)*0.6901);
-    delay1.delay(2, mapfloat(effect_delay_feedback, 0, ENC_DELAY_TIME_STEPS, 0.0, DELAY_MAX_TIME)*0.3450);
-    delayFilter.frequency(3000);
-    delayFilter.resonance(1.0);
-    delayFbMixer.gain(DRY_SIGNAL, 1.0); // original signal
-    delayFbMixer.gain(WET_SIGNAL, mapfloat(effect_delay_feedback, 0, ENC_DELAY_FB_STEPS, 0.0, 1.0)); // amount of feedback
-    delayFbMixer.gain(2,0); // additional feedback muted
-    delayFbMixer.gain(3,0); // additional feedback muted
-    delayMixer.gain(DRY_SIGNAL, 1.0);
-    delayMixer.gain(WET_SIGNAL, mapfloat(effect_delay_volume, 0, ENC_DELAY_VOLUME_STEPS, 0.0, 1.0)); // delayed signal (including feedback)
-    // dexed->fx.Gain =  1.0;
-    // dexed->fx.Reso = 1.0;// - float(effect_filter_resonance) / ENC_FILTER_RES_STEPS;
-    // dexed->fx.Cutoff = 0.5;// - float(effect_filter_cutoff) / ENC_FILTER_CUT_STEPS;
-
-    queueWaveshaper.shape(waveshape,9);
-    delayWaveshaper.shape(waveshape,9);
-    // queueAmp.gain(0, 0.5);
-    dcOneVolt.amplitude(1.0);
-    masterFilter.octaveControl(7);
-    masterFilter.frequency(40);
-    masterFilter.resonance(0.7);
-    filterModMixer.gain(0, 1);
-    filterModMixer.gain(1, 1);
-    filterEnv.releaseNoteOn(1);
-    filterEnv.attack(0.1);
-    filterEnv.decay(500);
-    filterEnv.sustain(0.5);
-    filterEnv.release(10000);
-
-    inverter.gain(0,-1.0);
-    chorus_l.begin(chorus_l_delayline, MOD_DELAY_SAMPLE_BUFFER);
-    chorus_r.begin(chorus_r_delayline, MOD_DELAY_SAMPLE_BUFFER);
-    modulator.begin(WAVEFORM_SINE);
-    modulator.frequency(0.5);
-    modulator.amplitude(0.25);
-    chorusFilter_r.setLowpass(0, MOD_FILTER_CUTOFF_HZ, 0.707);
-    chorusFilter_l.setLowpass(0, MOD_FILTER_CUTOFF_HZ, 0.707);
-    chorusMixer_l.gain(DRY_SIGNAL, 1.0);
-    chorusMixer_r.gain(DRY_SIGNAL, 1.0);
-    chorusMixer_l.gain(WET_SIGNAL, 0);
-    chorusMixer_r.gain(WET_SIGNAL, 0);
+    #include "voiceStatic.h"
 
     // load default SYSEX data
     load_sysex(configuration.bank, configuration.voice);
@@ -368,7 +336,7 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
         set_volume(configuration.vol, configuration.pan);
         break;
       case CC_PAN:
-        configuration.pan = float(inValue) / 128;
+        configuration.pan = inValueNorm;
         set_volume(configuration.vol, configuration.pan);
         break;
       case CC_SUSTAIN:
@@ -416,7 +384,7 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
         break;
       case CC_DELAY_FEEDBACK:
         effect_delay_feedback = inValue;
-        delayFbMixer.gain(1, inValueNorm*0.872);
+        delayFbMixer.gain(1, inValueNorm*0.87);
         #ifdef I2C_DISPLAY
         handle_ui();
         #endif
@@ -438,31 +406,16 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
         break;
       case CC_CHORUS_RATE:
         effect_chorus_rate = inValue;
-        modulator.frequency(0.01 + sq(inValueNorm) * 9.99);
+        modulator.frequency(0.01 + sq(inValueNorm) * 19.99);
         break;
       case CC_CHORUS_DEPTH:
         effect_chorus_depth = inValue;
-        modulator.amplitude(0.01 + inValueNorm*0.99);
+        modulator.amplitude(0.01 + inValueNorm*0.49);
         break;
       case CC_CHORUS_WAVE:
         effect_chorus_wave = inValue;
-        switch (inValue) {
-          case WAVEFORM_SINE:
-            modulator.begin(WAVEFORM_SINE);
-            break;
-          case WAVEFORM_SAWTOOTH:
-            modulator.begin(WAVEFORM_SAWTOOTH);
-            break;
-          case WAVEFORM_TRIANGLE:
-            modulator.begin(WAVEFORM_TRIANGLE);
-            break;
-          case WAVEFORM_SQUARE:
-            modulator.begin(WAVEFORM_SQUARE);
-            break;
-          case WAVEFORM_SAWTOOTH_REVERSE:
-            modulator.begin(WAVEFORM_SAWTOOTH_REVERSE);
-            break;
-        }
+        if (inValue < 63) modulator.begin(WAVEFORM_SINE);
+        else modulator.begin(WAVEFORM_TRIANGLE);
         break;
       case CC_CHORUS_ON:
         effect_chorus_on = inValue;
@@ -869,27 +822,27 @@ void show_patch(void) {
     Serial.print(F("OP"));
     Serial.print(6 - i, DEC);
     Serial.println(F(": "));
-    Serial.println(F("R1 | R2 | R3 | R4 | L1 | L2 | L3 | L4 LEV_SCL_BRK_PT | SCL_LEFT_DEPTH | SCL_RGHT_DEPTH"));
+    Serial.println(F("R1 | R2 | R3 | R4 | L1 | L2 | L3 | L4 | LEV_SCL_BRK_PT | SCL_LEFT_DEPTH | SCL_RGHT_DEPTH"));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_EG_R1], DEC);
-    Serial.print(F(" "));
+    Serial.print(F("   "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_EG_R2], DEC);
-    Serial.print(F(" "));
+    Serial.print(F("   "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_EG_R3], DEC);
-    Serial.print(F(" "));
+    Serial.print(F("   "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_EG_R4], DEC);
-    Serial.print(F(" "));
+    Serial.print(F("   "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_EG_L1], DEC);
-    Serial.print(F(" "));
+    Serial.print(F("   "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_EG_L2], DEC);
-    Serial.print(F(" "));
+    Serial.print(F("   "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_EG_L3], DEC);
-    Serial.print(F(" "));
+    Serial.print(F("   "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_EG_L4], DEC);
-    Serial.print(F("        "));
+    Serial.print(F("         "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_LEV_SCL_BRK_PT], DEC);
-    Serial.print(F("             "));
+    Serial.print(F("              "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_SCL_LEFT_DEPTH], DEC);
-    Serial.print(F("             "));
+    Serial.print(F("              "));
     Serial.println(dexed->data[(i * 21) + DEXED_OP_SCL_RGHT_DEPTH], DEC);
     Serial.println(F("SCL_L_CURVE | SCL_R_CURVE | RT_SCALE | AMS | KVS | OUT_LEV | OP_MOD | FRQ_C | FRQ_F | DETUNE"));
     Serial.print(F("      "));
@@ -912,12 +865,14 @@ void show_patch(void) {
     Serial.print(dexed->data[(i * 21) + DEXED_OP_FREQ_FINE], DEC);
     Serial.print(F("     "));
     Serial.println(dexed->data[(i * 21) + DEXED_OP_OSC_DETUNE], DEC);
+    delay(10);
   }
   Serial.println(F("PR1 | PR2 | PR3 | PR4 | PL1 | PL2 | PL3 | PL4"));
   Serial.print(F(" "));
   for (i = 0; i < 8; i++) {
     Serial.print(dexed->data[DEXED_VOICE_OFFSET + i], DEC);
     Serial.print(F("  "));
+    delay(10);
   }
   Serial.println();
   Serial.print(F("ALG: "));
@@ -947,11 +902,11 @@ void show_patch(void) {
   Serial.print(F("["));
   Serial.print(voicename);
   Serial.println(F("]"));
-  for (i = DEXED_GLOBAL_PARAMETER_OFFSET; i <= DEXED_GLOBAL_PARAMETER_OFFSET + DEXED_MAX_NOTES; i++) {
-    Serial.print(i, DEC);
-    Serial.print(F(": "));
-    Serial.println(dexed->data[i]);
-  }
+  // for (i = DEXED_GLOBAL_PARAMETER_OFFSET; i <= DEXED_GLOBAL_PARAMETER_OFFSET + DEXED_MAX_NOTES; i++) {
+  //   Serial.print(i, DEC);
+  //   Serial.print(F(": "));
+  //   Serial.println(dexed->data[i]);
+  // }
 
   Serial.println();
 }

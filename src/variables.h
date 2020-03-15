@@ -55,7 +55,7 @@ config_t configuration = {0xffff, 0, 0, VOLUME, 0.5f, DEFAULT_MIDI_CHANNEL};
 bool eeprom_update_flag = false;
 const float DIV127 = (1.0 / 127.0);
 uint8_t voiceCount = 0;
-// float waveshape[9] = {
+// float waveshape[9] = { // atan
 //   -0.785398163397448,
 //   -0.643501108793284,
 //   -0.463647609000806,
@@ -66,7 +66,7 @@ uint8_t voiceCount = 0;
 //   0.643501108793284,
 //   0.785398163397448
 // };
-float waveshape[9] = {
+float waveshape[9] = { // manually edited atan
   -0.765398163397448,
   -0.663501108793284,
   -0.503647609000806,
@@ -77,8 +77,8 @@ float waveshape[9] = {
   0.663501108793284,
   0.765398163397448
 };
-short chorus_l_delayline[MOD_DELAY_SAMPLE_BUFFER];
-short chorus_r_delayline[MOD_DELAY_SAMPLE_BUFFER];
+short chorus_l_delayline[CHORUS_SAMPLE_BUFFER];
+short chorus_r_delayline[CHORUS_SAMPLE_BUFFER];
 uint8_t effect_chorus_rate;
 uint8_t effect_chorus_depth;
 uint8_t effect_chorus_wave;

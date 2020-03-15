@@ -1,24 +1,7 @@
-/* Audio Library for Teensy 3.X
-   Copyright (c) 2014, Pete (El Supremo)
-   Copyright (c) 2019, Holger Wirtz
-
-   Permission is hereby granted, free of charge, to any person obtaining a copy
-   of this software and associated documentation files (the "Software"), to deal
-   in the Software without restriction, including without limitation the rights
-   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   copies of the Software, and to permit persons to whom the Software is
-   furnished to do so, subject to the following conditions:
-
-   The above copyright notice and this permission notice shall be included in
-   all copies or substantial portions of the Software.
-
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-   THE SOFTWARE.
+/*
+Audio Library for Teensy 3.X
+Copyright (c) 2014, Pete (El Supremo)
+Copyright (c) 2019, Holger Wirtz
 */
 
 #include <Arduino.h>
@@ -35,10 +18,13 @@ extern config_t configuration;
 // 140529 - change to handle mono stream - change modify() to voices()
 // 140219 - correct storage class (not static)
 // 190527 - added modulation input (by Holger Wirtz)
+
+#ifndef ARM_Q15_TO_FLOAT
+#define ARM_Q15_TO_FLOAT
+// pasted function from arm_math.h due to include problems
 void arm_q15_to_float(q15_t * pSrc, float32_t * pDst, uint32_t blockSize) {
   q15_t *pIn = pSrc;                             /* Src pointer */
   uint32_t blkCnt;                               /* loop counter */
-
 
 #ifndef ARM_MATH_CM0_FAMILY
 
@@ -85,10 +71,10 @@ void arm_q15_to_float(q15_t * pSrc, float32_t * pDst, uint32_t blockSize) {
     blkCnt--;
   }
 }
+#endif // ARM_Q15_TO_FLOAT
 
 
-boolean AudioEffectModulatedDelay::begin(short *delayline, uint16_t d_length)
-{
+boolean AudioEffectModulatedDelay::begin(short *delayline, uint16_t d_length) {
 #if 0
   Serial.print(F("AudioEffectModulatedDelay.begin(modulated-delay line length = "));
   Serial.print(d_length);
@@ -113,13 +99,11 @@ boolean AudioEffectModulatedDelay::begin(short *delayline, uint16_t d_length)
   return (true);
 }
 
-uint16_t AudioEffectModulatedDelay::get_delay_length(void)
-{
+uint16_t AudioEffectModulatedDelay::get_delay_length(void) {
   return (_delay_length);
 }
 
-void AudioEffectModulatedDelay::update(void)
-{
+void AudioEffectModulatedDelay::update(void) {
   audio_block_t *block;
   audio_block_t *modulation;
 
@@ -146,7 +130,7 @@ void AudioEffectModulatedDelay::update(void)
     for (uint16_t i = 0; i < AUDIO_BLOCK_SAMPLES; i++)
     {
       // write data into circular buffer (delayline)
-      if (_cb_index >= _delay_length)
+      if (_cb_index >= _delay_length) //TODO make write-once-read-stereo version
         _cb_index = 0;
       _delayline[_cb_index] = *bp;
 
