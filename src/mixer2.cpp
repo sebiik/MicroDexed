@@ -1,6 +1,11 @@
+/*
+sebiiksbcs 2020
+*/
+
 #include <Arduino.h>
 #include "mixer2.h"
 #include "utility/dspinst.h"
+
 
 #if defined(__ARM_ARCH_7EM__)
 #define MULTI_UNITYGAIN 65536

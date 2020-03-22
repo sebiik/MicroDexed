@@ -19,59 +19,59 @@ extern config_t configuration;
 // 140219 - correct storage class (not static)
 // 190527 - added modulation input (by Holger Wirtz)
 
-#ifndef ARM_Q15_TO_FLOAT
-#define ARM_Q15_TO_FLOAT
-// pasted function from arm_math.h due to include problems
-void arm_q15_to_float(q15_t * pSrc, float32_t * pDst, uint32_t blockSize) {
-  q15_t *pIn = pSrc;                             /* Src pointer */
-  uint32_t blkCnt;                               /* loop counter */
-
-#ifndef ARM_MATH_CM0_FAMILY
-
-  /* Run the below code for Cortex-M4 and Cortex-M3 */
-
-  /*loop Unrolling */
-  blkCnt = blockSize >> 2u;
-
-  /* First part of the processing with loop unrolling.  Compute 4 outputs at a time.
-   ** a second loop below computes the remaining 1 to 3 samples. */
-  while(blkCnt > 0u)
-  {
-    /* C = (float32_t) A / 32768 */
-    /* convert from q15 to float and then store the results in the destination buffer */
-    *pDst++ = ((float32_t) * pIn++ / 32768.0f);
-    *pDst++ = ((float32_t) * pIn++ / 32768.0f);
-    *pDst++ = ((float32_t) * pIn++ / 32768.0f);
-    *pDst++ = ((float32_t) * pIn++ / 32768.0f);
-
-    /* Decrement the loop counter */
-    blkCnt--;
-  }
-
-  /* If the blockSize is not a multiple of 4, compute any remaining output samples here.
-   ** No loop unrolling is used. */
-  blkCnt = blockSize % 0x4u;
-
-#else
-
-  /* Run the below code for Cortex-M0 */
-
-  /* Loop over blockSize number of values */
-  blkCnt = blockSize;
-
-#endif /* #ifndef ARM_MATH_CM0_FAMILY */
-
-  while(blkCnt > 0u)
-  {
-    /* C = (float32_t) A / 32768 */
-    /* convert from q15 to float and then store the results in the destination buffer */
-    *pDst++ = ((float32_t) * pIn++ / 32768.0f);
-
-    /* Decrement the loop counter */
-    blkCnt--;
-  }
-}
-#endif // ARM_Q15_TO_FLOAT
+// #ifndef ARM_Q15_TO_FLOAT
+// #define ARM_Q15_TO_FLOAT
+// // pasted function from arm_math.h due to include problems
+// void arm_q15_to_float(q15_t * pSrc, float32_t * pDst, uint32_t blockSize) {
+//   q15_t *pIn = pSrc;                             /* Src pointer */
+//   uint32_t blkCnt;                               /* loop counter */
+//
+// #ifndef ARM_MATH_CM0_FAMILY
+//
+//   /* Run the below code for Cortex-M4 and Cortex-M3 */
+//
+//   /*loop Unrolling */
+//   blkCnt = blockSize >> 2u;
+//
+//   /* First part of the processing with loop unrolling.  Compute 4 outputs at a time.
+//    ** a second loop below computes the remaining 1 to 3 samples. */
+//   while(blkCnt > 0u)
+//   {
+//     /* C = (float32_t) A / 32768 */
+//     /* convert from q15 to float and then store the results in the destination buffer */
+//     *pDst++ = ((float32_t) * pIn++ / 32768.0f);
+//     *pDst++ = ((float32_t) * pIn++ / 32768.0f);
+//     *pDst++ = ((float32_t) * pIn++ / 32768.0f);
+//     *pDst++ = ((float32_t) * pIn++ / 32768.0f);
+//
+//     /* Decrement the loop counter */
+//     blkCnt--;
+//   }
+//
+//   /* If the blockSize is not a multiple of 4, compute any remaining output samples here.
+//    ** No loop unrolling is used. */
+//   blkCnt = blockSize % 0x4u;
+//
+// #else
+//
+//   /* Run the below code for Cortex-M0 */
+//
+//   /* Loop over blockSize number of values */
+//   blkCnt = blockSize;
+//
+// #endif /* #ifndef ARM_MATH_CM0_FAMILY */
+//
+//   while(blkCnt > 0u)
+//   {
+//     /* C = (float32_t) A / 32768 */
+//     /* convert from q15 to float and then store the results in the destination buffer */
+//     *pDst++ = ((float32_t) * pIn++ / 32768.0f);
+//
+//     /* Decrement the loop counter */
+//     blkCnt--;
+//   }
+// }
+// #endif // ARM_Q15_TO_FLOAT
 
 
 boolean AudioEffectModulatedDelay::begin(short *delayline, uint16_t d_length) {

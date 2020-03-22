@@ -11,7 +11,6 @@ Bounce myButtons[NUM_DIN_BUTTONS] = {
   Bounce(dinPinList[5], BUT_DEBOUNCE_MS)
 };
 
-
 void init_myButtons(void) {
   for (uint8_t i=3; i<NUM_DIN_BUTTONS+3; i++)
     pinMode(dinPinList[i], INPUT_PULLUP);

@@ -223,11 +223,11 @@ void Dexed::keydown(uint8_t pitch, uint8_t velo) {
           voices[note].dx7_note->transferSignal(*voices[i].dx7_note);
           break;
         }
-        if ( voices[i].midi_note < pitch ) {
+        // if ( voices[i].midi_note < pitch ) { //seb legato hack
           voices[i].live = false;
           voices[note].dx7_note->transferState(*voices[i].dx7_note);
           break;
-        }
+        // }
         return;
       }
     }
@@ -256,7 +256,7 @@ void Dexed::keyup(uint8_t pitch) {
     int8_t highNote = -1;
     int8_t target = 0;
     for (int8_t i = 0; i < max_notes; i++) {
-      if ( voices[i].keydown && voices[i].midi_note > highNote ) {
+      if ( voices[i].keydown && voices[i].midi_note != highNote ) { //seb
         target = i;
         highNote = voices[i].midi_note;
       }

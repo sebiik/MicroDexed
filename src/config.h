@@ -97,7 +97,8 @@ Optimize: "Fastest + pure-code"
 
 //******************************************************************************
 //* HARDWARE SETTINGS
-#define SGTL5000_LINEOUT_LEVEL 29
+// default == 29 (1.29vpp), 15 == 2.83vpp (line level +0dbv)
+#define SGTL5000_LINEOUT_LEVEL 15
 
 // SD card on Teensy Audio Shield:
 //#define SDCARD_CS_PIN    10
@@ -117,15 +118,15 @@ Optimize: "Fastest + pure-code"
 #define ENC_DELAY_FB_STEPS 127
 #define ENC_DELAY_VOLUME_STEPS 127
 #define NUM_ENCODER 2
-#define ENC_L_PIN_A  3
-#define ENC_L_PIN_B  2
-#define BUT_L_PIN    4
+#define ENC_L_PIN_A  4
+#define ENC_L_PIN_B  3
+#define BUT_L_PIN    2
 #define INITIAL_ENC_L_VALUE 0
-#define ENC_R_PIN_A  28
-#define ENC_R_PIN_B  29
-#define BUT_R_PIN    30
+#define ENC_R_PIN_A  30
+#define ENC_R_PIN_B  28
+#define BUT_R_PIN    29
 #define INITIAL_ENC_R_VALUE 0
-#define BUT_DEBOUNCE_MS 10
+#define BUT_DEBOUNCE_MS 8
 #define LONG_BUTTON_PRESS 750
 
 // LCD Display

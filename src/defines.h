@@ -21,7 +21,7 @@
 #define CC_CHORUS_RATE 111
 #define CC_CHORUS_DEPTH 112
 #define CC_CHORUS_WAVE 113
-#define CC_CHORUS_ON 114
+#define CC_CHORUS_WET 114
 
 
 #define CC_PANIC 120
@@ -31,6 +31,7 @@
 #define CC_SET_POLY_MODE 127
 
 /* Helpers */
+#define HALFPI 1.570796
 #define DRY_SIGNAL 0
 #define WET_SIGNAL 1
 

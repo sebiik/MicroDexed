@@ -13,12 +13,7 @@
 // #include "PluginFx.h"
 
 
-/* TODO Equal power pan/dry-wet:
-dry = cos($valueNorm * 3.14159 / 2);
-wet = sin($valueNorm * 3.14159 / 2);
-*/
-
-// TODO follow codeberg continue from ffe25453d5
+// TODO follow codeberg continue from b9f7f19cc6
 
 
 #ifdef I2C_DISPLAY
@@ -31,9 +26,8 @@ wet = sin($valueNorm * 3.14159 / 2);
 
 #include "defines.h"
 #include "adc.h"
-#include "din.h"
 #include "mixer2.h"
-#include "effect_modulated_delay.h"
+#include "effect_modulated_delay_stereo.h"
 #include "variables.h"
 #include "guiTool.h"
 
@@ -52,7 +46,6 @@ void setup() {
   lcd.lineWrap();
   lcd.clear();
   lcd.display();
-  lcd.home();
   lcd.print(F("MicroDexed"));
   lcd.write(VERSION);
   lcd.setCursor(0, 1);
@@ -193,7 +186,6 @@ void setup() {
 
   AudioInterrupts();
   Serial.println(F("<setup end>"));
-
 }
 
 
@@ -377,25 +369,28 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
       case CC_DELAY_TIME:
         effect_delay_time = inValue;
         delay1.delay(0, (10 + inValueNorm * (DELAY_MAX_TIME-10)));
-        delay1.delay(1, (40 + inValueNorm * (DELAY_MAX_TIME-10)-30));
         #ifdef I2C_DISPLAY
         handle_ui();
         #endif
         break;
       case CC_DELAY_FEEDBACK:
         effect_delay_feedback = inValue;
-        delayFbMixer.gain(1, inValueNorm*0.87);
+        delayFbMixer.gain(1, inValueNorm*0.8);
         #ifdef I2C_DISPLAY
         handle_ui();
         #endif
         break;
-      case CC_DELAY_VOLUME:
+      case CC_DELAY_VOLUME: {
         effect_delay_volume = inValue;
-        delayMixer.gain(1, inValueNorm);
+        float tempDry = cosf(inValueNorm * HALFPI);
+        float tempWet = sinf(inValueNorm * HALFPI);
+        delayMixer.gain(DRY_SIGNAL, tempDry);
+        delayMixer.gain(WET_SIGNAL, tempWet);
         #ifdef I2C_DISPLAY
         handle_ui();
         #endif
         break;
+      }
       case CC_DELAY_FILTER_FREQUENCY:
         effect_delay_filter_frequency = inValue;
         delayFilter.frequency(100 + sq(inValueNorm)*9900); // TODO use log() instead of sq()
@@ -406,7 +401,7 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
         break;
       case CC_CHORUS_RATE:
         effect_chorus_rate = inValue;
-        modulator.frequency(0.01 + sq(inValueNorm) * 19.99);
+        modulator.frequency(0.01 + sq(inValueNorm) * 9.99);
         break;
       case CC_CHORUS_DEPTH:
         effect_chorus_depth = inValue;
@@ -417,22 +412,16 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
         if (inValue < 63) modulator.begin(WAVEFORM_SINE);
         else modulator.begin(WAVEFORM_TRIANGLE);
         break;
-      case CC_CHORUS_ON:
+      case CC_CHORUS_WET: {
         effect_chorus_on = inValue;
-        if (inValue > 63) {
-          chorusMixer_l.gain(DRY_SIGNAL, 0);
-          chorusMixer_r.gain(DRY_SIGNAL, 0);
-          chorusMixer_l.gain(WET_SIGNAL, 1);
-          chorusMixer_r.gain(WET_SIGNAL, 1);
-        }
-        else {
-          chorusMixer_l.gain(DRY_SIGNAL, 1);
-          chorusMixer_r.gain(DRY_SIGNAL, 1);
-          chorusMixer_l.gain(WET_SIGNAL, 0);
-          chorusMixer_r.gain(WET_SIGNAL, 0);
-        }
-
+        float tempDry = cosf(inValueNorm * HALFPI);
+        float tempWet = sinf(inValueNorm * HALFPI);
+        chorusMixer_l.gain(DRY_SIGNAL, tempDry);
+        chorusMixer_r.gain(DRY_SIGNAL, tempDry);
+        chorusMixer_l.gain(WET_SIGNAL, tempWet);
+        chorusMixer_r.gain(WET_SIGNAL, tempWet);
         break;
+      }
       case CC_PANIC:
         dexed->panic();
         dexed->notesOff();
@@ -695,18 +684,18 @@ void set_volume(float v, float p) {
   Serial.print(F("["));
   Serial.print(configuration.pan, DEC);
   Serial.print(F("] "));
-  Serial.print(pow(configuration.vol * sinf(configuration.pan * PI / 2), VOLUME_CURVE), 3);
+  Serial.print(pow(configuration.vol * sinf(configuration.pan * HALFPI), VOLUME_CURVE), 3);
   Serial.print(F("/"));
-  Serial.println(pow(configuration.vol * cosf( configuration.pan * PI / 2), VOLUME_CURVE), 3);
+  Serial.println(pow(configuration.vol * cosf( configuration.pan * HALFPI), VOLUME_CURVE), 3);
   #endif
 
   // http://files.csound-tutorial.net/floss_manual/Release03/Cs_FM_03_ScrapBook/b-panning-and-spatialization.html
   #ifdef TEENSY_AUDIO_BOARD
-  sgtl5000_1.dacVolume(pow(v * sinf(p * PI / 2), VOLUME_CURVE), pow(v * cosf(p * PI / 2), VOLUME_CURVE));
+  sgtl5000_1.dacVolume(pow(v * sinf(p * HALFPI), VOLUME_CURVE), pow(v * cosf(p * HALFPI), VOLUME_CURVE));
   #else
   volume_master.gain(VOLUME_CURVE);
-  volume_r.gain(sinf(p * PI / 2));
-  volume_l.gain(cosf(p * PI / 2));
+  volume_r.gain(sinf(p * HALFPI));
+  volume_l.gain(cosf(p * HALFPI));
   #endif
 }
 
@@ -838,40 +827,38 @@ void show_patch(void) {
     Serial.print(dexed->data[(i * 21) + DEXED_OP_EG_L3], DEC);
     Serial.print(F("   "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_EG_L4], DEC);
-    Serial.print(F("         "));
+    Serial.print(F("   "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_LEV_SCL_BRK_PT], DEC);
-    Serial.print(F("              "));
+    Serial.print(F("               "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_SCL_LEFT_DEPTH], DEC);
-    Serial.print(F("              "));
+    Serial.print(F("               "));
     Serial.println(dexed->data[(i * 21) + DEXED_OP_SCL_RGHT_DEPTH], DEC);
     Serial.println(F("SCL_L_CURVE | SCL_R_CURVE | RT_SCALE | AMS | KVS | OUT_LEV | OP_MOD | FRQ_C | FRQ_F | DETUNE"));
-    Serial.print(F("      "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_SCL_LEFT_CURVE], DEC);
-    Serial.print(F("         "));
+    Serial.print(F("            "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_SCL_RGHT_CURVE], DEC);
-    Serial.print(F("         "));
+    Serial.print(F("            "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_OSC_RATE_SCALE], DEC);
-    Serial.print(F("        "));
+    Serial.print(F("         "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_AMP_MOD_SENS], DEC);
-    Serial.print(F("     "));
-    Serial.print(dexed->data[(i * 21) + DEXED_OP_KEY_VEL_SENS], DEC);
-    Serial.print(F("      "));
-    Serial.print(dexed->data[(i * 21) + DEXED_OP_OUTPUT_LEV], DEC);
-    Serial.print(F("      "));
-    Serial.print(dexed->data[(i * 21) + DEXED_OP_OSC_MODE], DEC);
     Serial.print(F("    "));
+    Serial.print(dexed->data[(i * 21) + DEXED_OP_KEY_VEL_SENS], DEC);
+    Serial.print(F("    "));
+    Serial.print(dexed->data[(i * 21) + DEXED_OP_OUTPUT_LEV], DEC);
+    Serial.print(F("        "));
+    Serial.print(dexed->data[(i * 21) + DEXED_OP_OSC_MODE], DEC);
+    Serial.print(F("       "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_FREQ_COARSE], DEC);
-    Serial.print(F("     "));
+    Serial.print(F("      "));
     Serial.print(dexed->data[(i * 21) + DEXED_OP_FREQ_FINE], DEC);
-    Serial.print(F("     "));
+    Serial.print(F("      "));
     Serial.println(dexed->data[(i * 21) + DEXED_OP_OSC_DETUNE], DEC);
     delay(10);
   }
   Serial.println(F("PR1 | PR2 | PR3 | PR4 | PL1 | PL2 | PL3 | PL4"));
-  Serial.print(F(" "));
   for (i = 0; i < 8; i++) {
     Serial.print(dexed->data[DEXED_VOICE_OFFSET + i], DEC);
-    Serial.print(F("  "));
+    Serial.print(F("    "));
     delay(10);
   }
   Serial.println();
@@ -902,12 +889,11 @@ void show_patch(void) {
   Serial.print(F("["));
   Serial.print(voicename);
   Serial.println(F("]"));
-  // for (i = DEXED_GLOBAL_PARAMETER_OFFSET; i <= DEXED_GLOBAL_PARAMETER_OFFSET + DEXED_MAX_NOTES; i++) {
-  //   Serial.print(i, DEC);
-  //   Serial.print(F(": "));
-  //   Serial.println(dexed->data[i]);
-  // }
-
+  for (i = DEXED_GLOBAL_PARAMETER_OFFSET; i <= DEXED_GLOBAL_PARAMETER_OFFSET + DEXED_MAX_NOTES; i++) {
+    Serial.print(i, DEC);
+    Serial.print(F(": "));
+    Serial.println(dexed->data[i]);
+  }
   Serial.println();
 }
 #endif
