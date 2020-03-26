@@ -13,7 +13,7 @@
 // #include "PluginFx.h"
 
 
-// TODO follow codeberg continue from b9f7f19cc6
+// TODO follow codeberg continue from 95c783fab6
 
 
 #ifdef I2C_DISPLAY
@@ -29,13 +29,11 @@
 #include "mixer2.h"
 #include "effect_modulated_delay_stereo.h"
 #include "variables.h"
-#include "guiTool.h"
+#include "GUITool.h"
 
 
 /******************************** Setup ********************************/
 void setup() {
-  //while (!Serial) ; // wait for Arduino Serial Monitor
-  Serial.begin(SERIAL_SPEED);
 
   #ifdef I2C_DISPLAY
   lcd.begin(16, 2);
@@ -56,7 +54,10 @@ void setup() {
   pinMode(BUT_R_PIN, INPUT_PULLUP);
   #endif
 
+  //while (!Serial) ; // wait for Arduino Serial Monitor
+  Serial.begin(SERIAL_SPEED);
   delay(100);
+
   Serial.println(F("MicroDexed based on https://github.com/asb2m10/dexed"));
   Serial.println(F("(c)2018,2019 H. Wirtz <wirtz@parasitstudio.de>"));
   Serial.println(F("edited 2019,2020 by sebiiksbcs"));
@@ -69,7 +70,6 @@ void setup() {
 
   setup_midi_devices();
 
-  // start audio card
   AudioNoInterrupts();
   AudioMemory(AUDIO_MEM);
 
@@ -700,11 +700,11 @@ void set_volume(float v, float p) {
 }
 
 
-// https://www.dr-lex.be/info-stuff/volumecontrols.html#table1
-inline float logvol(float x) {
-
-  return (0.001 * expf(6.908 * x));
-}
+// // https://www.dr-lex.be/info-stuff/volumecontrols.html#table1
+// inline float logvol(float x) {
+//
+//   return (0.001 * expf(6.908 * x));
+// }
 
 
 /* EEPROM HELPER */

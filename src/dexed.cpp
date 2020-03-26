@@ -256,7 +256,7 @@ void Dexed::keyup(uint8_t pitch) {
     int8_t highNote = -1;
     int8_t target = 0;
     for (int8_t i = 0; i < max_notes; i++) {
-      if ( voices[i].keydown && voices[i].midi_note != highNote ) { //seb
+      if ( voices[i].keydown && voices[i].midi_note != highNote ) { //seb legato hack
         target = i;
         highNote = voices[i].midi_note;
       }
