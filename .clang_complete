@@ -1,7 +1,7 @@
 -I/home/sbcu/Dropbox/pcb-layouts/teensy-midi-audio/MicroDexed/src
+-I/home/sbcu/.platformio/packages/framework-arduinoteensy/libraries/Bounce
 -I/home/sbcu/Dropbox/pcb-layouts/teensy-midi-audio/MicroDexed/.pio/libdeps/teensy35/hd44780_ID738
 -I/home/sbcu/.platformio/packages/framework-arduinoteensy/libraries/MIDI/src
--I/home/sbcu/.platformio/packages/framework-arduinoteensy/libraries/Bounce
 -I/home/sbcu/.platformio/packages/framework-arduinoteensy/libraries/Audio
 -I/home/sbcu/.platformio/packages/framework-arduinoteensy/libraries/Audio/utility
 -I/home/sbcu/.platformio/packages/framework-arduinoteensy/libraries/SD

@@ -31,12 +31,12 @@ void handle_ui(void) {
   }
 
   for (uint8_t i = 0; i < NUM_ENCODER; i++) {
-    but[i].update();
+    encSwitch[i].update();
 
-    if (but[i].fallingEdge())
+    if (encSwitch[i].fallingEdge())
     long_button_pressed = 0;
 
-    if (but[i].risingEdge()) {
+    if (encSwitch[i].risingEdge()) {
       uint32_t button_released = long_button_pressed;
 
       // if (button_released > LONG_BUTTON_PRESS) {

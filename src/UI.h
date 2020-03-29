@@ -38,7 +38,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 extern Encoder4 enc[2];
 extern int32_t enc_val[2];
-extern Bounce but[2];
+extern Bounce encSwitch[2];
 extern Bounce myButtons[3]; //seb
 extern hd44780_I2Clcd lcd;
 extern config_t configuration;

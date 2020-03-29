@@ -1,33 +1,31 @@
 #include "config.h"
 #include <Audio.h>
-#include <Wire.h>
-#include <SPI.h>
+// #include <Wire.h>
+// #include <SPI.h>
 #include <SD.h>
 #include <MIDI.h>
-#include <EEPROM.h>
+// #include <EEPROM.h>
 #include "EEPROMAnything.h"
 #include "midi_devices.hpp"
-#include <limits.h>
+// #include <limits.h>
 #include "dexed.h"
 #include "dexed_sysex.h"
 // #include "PluginFx.h"
 
-
-// TODO follow codeberg continue from 95c783fab6
-
+// TODO follow codeberg continue from f1f4
 
 #ifdef I2C_DISPLAY
 #include "UI.h"
-#include <Bounce.h>
-#include "Encoder4.h"
+// #include <Bounce.h>
+// #include "Encoder4.h"
 #include <hd44780.h>
 #include <hd44780ioClass/hd44780_I2Clcd.h> // include i/o class header
 #endif
 
 #include "defines.h"
 #include "adc.h"
-#include "mixer2.h"
-#include "effect_modulated_delay_stereo.h"
+// #include "mixer2.h"
+// #include "effect_modulated_delay_stereo.h"
 #include "variables.h"
 #include "GUITool.h"
 
@@ -149,8 +147,8 @@ void setup() {
   enc_val[0] = enc[0].read();
   enc[1].write(configuration.voice);
   enc_val[1] = enc[1].read();
-  but[0].update();
-  but[1].update();
+  encSwitch[0].update();
+  encSwitch[1].update();
 
   #endif
 

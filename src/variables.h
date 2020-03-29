@@ -11,7 +11,7 @@ int32_t enc_val[2] = {
   INITIAL_ENC_L_VALUE,
   INITIAL_ENC_R_VALUE
 };
-Bounce but[2] = {
+Bounce encSwitch[2] = {
   Bounce(BUT_L_PIN, BUT_DEBOUNCE_MS),
   Bounce(BUT_R_PIN, BUT_DEBOUNCE_MS)
 };

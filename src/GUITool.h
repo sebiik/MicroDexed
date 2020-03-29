@@ -1,7 +1,8 @@
 #ifndef GUITOOL_H_INCLUDED
 #define GUITOOL_H_INCLUDED
 
-// #include "mixer2.h"
+#include "effect_modulated_delay_stereo.h"
+#include "mixer2.h"
 
 AudioPlayQueue            queue1;
 AudioAnalyzePeak          peak1;

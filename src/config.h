@@ -8,7 +8,7 @@ Optimize: "Fastest + pure-code"
 #ifndef CONFIG_H_INCLUDED
 #define CONFIG_H_INCLUDED
 
-#include "midinotes.h"
+// #include "midinotes.h"
 
 // ATTENTION! For better latency you have to redefine AUDIO_BLOCK_SAMPLES from
 // 128 to 64 in <ARDUINO-IDE-DIR>/cores/teensy3/AudioStream.h
@@ -50,7 +50,7 @@ Optimize: "Fastest + pure-code"
 //* MIDI SETTINGS
 
 // Midi channel 7 for DX-7.. easier to remember
-#define DEFAULT_MIDI_CHANNEL 7 //MIDI_CHANNEL_OMNI
+#define DEFAULT_MIDI_CHANNEL MIDI_CHANNEL_OMNI
 // #define MIDI_MERGE_THRU 1
 #define DEFAULT_SYSEXBANK 0
 #define DEFAULT_SYSEXSOUND 0
