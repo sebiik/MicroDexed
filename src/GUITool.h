@@ -94,8 +94,8 @@ AudioAmplifier           volume_l;
 AudioConnection          patchCord25(delayMixer, 0, volume_master, 0);
 AudioConnection          patchCord26(volume_master, 0, volume_l, 0);
 AudioConnection          patchCord27(volume_master, 0, volume_r, 0);
-AudioConnection          patchCord28(volume_l, 0, pt8211_1, 0);
-AudioConnection          patchCord28(volume_r, 0, pt8211_1, 1);
+AudioConnection          masterOutL(volume_l, 0, pt8211_1, 0);
+AudioConnection          masterOutR(volume_r, 0, pt8211_1, 1);
 #endif
 
 #endif //GUITOOL_H_INCLUDED

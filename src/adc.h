@@ -8,18 +8,15 @@
 
 const uint8_t ainPinList[12] = {1, 2, 3, 6, 7, 16, 17, 18, 19, 20, 21, 22};
 const float EMA_a = 0.125;      //initialize EMA alpha
-const uint8_t layerList[NUM_LAYERS] = {11, 21, 31, 41, 51, 61, 71, 81}; // Layer 1: CC11...18, Layer2: CC21...28, etc.
 
 float ainRead[NUM_ADC_CHANNELS];
-uint8_t pots[NUM_LAYERS][NUM_ADC_CHANNELS];
-uint8_t potsLast[NUM_LAYERS][NUM_ADC_CHANNELS];
+uint8_t potValues[NUM_CONTROLS];
+uint8_t potValuesLast[NUM_CONTROLS];
 uint8_t activeLayer = 0;
 
 void initADC(void) {
-  for (uint8_t i = 0; i < NUM_LAYERS; i++) {
-    for (uint8_t j = 0; j < NUM_ADC_CHANNELS; j++) {
-      potsLast[i][j] = pots[i][j];
-    }
+  for (uint8_t i = 0; i < NUM_CONTROLS; i++) {
+    potValuesLast[i] = potValues[i];
   }
 }
 
@@ -38,25 +35,23 @@ void readADC(void) {
     // If value exceeds threshold, update
     if ((abs(sensorAverage - ainRead[i]) > 0.9)) {
       ainRead[i] += EMA_a * (sensorAverage - ainRead[i]);
-      pots[activeLayer][i] = uint8_t(ainRead[i]);
+      potValues[(activeLayer*8) + i] = uint8_t(ainRead[i]);
     }
   }
 }
 
-void sendCC(uint8_t layer, uint8_t pot, uint8_t ccValue, uint8_t outChannel) {
-  midi_serial.sendControlChange(layerList[layer]+pot, ccValue, outChannel);
+void sendCC(uint8_t ccNumber, uint8_t ccValue, uint8_t outChannel) {
+  midi_serial.sendControlChange(ccNumber, ccValue, outChannel);
 }
 
 void updateCC(void) {
-  for (uint8_t i=0; i<NUM_LAYERS; i++) {
-    for (uint8_t j=0; j<NUM_ADC_CHANNELS; j++) {
-      if (pots[i][j] != potsLast[i][j]) {
-        //    layer, pot, value,      channel
-        sendCC(i,    j,   pots[i][j], MIDI_OUT_CHANNEL);
-        potsLast[i][j] = pots[i][j];
+  for (uint8_t i=0; i<NUM_CONTROLS; i++) {
+      if (potValues[i] != potValuesLast[i]) {
+        //    pot, value,           channel
+        sendCC(i,  potValues[i], MIDI_OUT_CHANNEL);
+        potValuesLast[i] = potValues[i];
       }
     }
-  }
 }
 
 #endif /* ADC_H_INCLUDED */

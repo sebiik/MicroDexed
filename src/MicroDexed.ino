@@ -12,7 +12,7 @@
 #include "dexed_sysex.h"
 // #include "PluginFx.h"
 
-// TODO follow codeberg continue from f1f4
+// TODO follow codeberg continue from b8015
 
 #ifdef I2C_DISPLAY
 #include "UI.h"
