@@ -138,6 +138,7 @@ void AudioEffectModulatedDelayStereo::update(void) {
     mp2 = modulation2_f32;
 
     for (uint16_t i = 0; i < AUDIO_BLOCK_SAMPLES; i++) {
+
       // write data into circular buffer (delayline)
       if (_cb_index >= _delay_length)
         _cb_index = 0;

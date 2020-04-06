@@ -12,7 +12,7 @@
 #include "dexed_sysex.h"
 // #include "PluginFx.h"
 
-// TODO follow codeberg continue from b8015
+// TODO follow codeberg continue from 836a
 
 #ifdef I2C_DISPLAY
 #include "UI.h"
@@ -343,7 +343,7 @@ void handleControlChange(byte inChannel, byte inCtrl, byte inValue) {
       case CC_FILTER_RESO:
         effect_filter_resonance = inValue;
         // dexed->fx.Reso = inValueNorm;
-        masterFilter.resonance(0.7 + inValueNorm * 4.7);
+        paraphonicFilter.resonance(0.7 + inValueNorm * 4.7);
         #ifdef I2C_DISPLAY
         handle_ui();
         #endif
@@ -690,19 +690,11 @@ void set_volume(float v, float p) {
   // http://files.csound-tutorial.net/floss_manual/Release03/Cs_FM_03_ScrapBook/b-panning-and-spatialization.html
   #ifdef TEENSY_AUDIO_BOARD
   sgtl5000_1.dacVolume(pow(v * sinf(p * HALFPI), VOLUME_CURVE), pow(v * cosf(p * HALFPI), VOLUME_CURVE));
-  #else
-  volume_master.gain(VOLUME_CURVE);
+  #else // assume PT8211
   volume_r.gain(sinf(p * HALFPI));
   volume_l.gain(cosf(p * HALFPI));
   #endif
 }
-
-
-// // https://www.dr-lex.be/info-stuff/volumecontrols.html#table1
-// inline float logvol(float x) {
-//
-//   return (0.001 * expf(6.908 * x));
-// }
 
 
 /* EEPROM HELPER */

@@ -13,9 +13,9 @@ delayMixer.gain(WET_SIGNAL, mapfloat(effect_delay_volume, 0, ENC_DELAY_VOLUME_ST
 queueWaveshaper.shape(waveshape,9);
 delayWaveshaper.shape(waveshape,9);
 dcOneVolt.amplitude(1.0);
-masterFilter.octaveControl(7);
-masterFilter.frequency(40);
-masterFilter.resonance(0.7);
+paraphonicFilter.octaveControl(7);
+paraphonicFilter.frequency(40);
+paraphonicFilter.resonance(0.7);
 filterModMixer.gain(0, 1);
 filterModMixer.gain(1, 1);
 filterEnv.releaseNoteOn(1);
