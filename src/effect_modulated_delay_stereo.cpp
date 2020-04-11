@@ -110,8 +110,8 @@ void AudioEffectModulatedDelayStereo::update(void) {
 
   block = receiveWritable(0);
   block2 = allocate();
-  modulation = receiveReadOnly(1);
 
+  modulation = receiveReadOnly(1);
   modulation2 = receiveReadOnly(2);
 
   if (block && modulation) {
@@ -135,7 +135,7 @@ void AudioEffectModulatedDelayStereo::update(void) {
     arm_q15_to_float(modulation->data, modulation_f32, AUDIO_BLOCK_SAMPLES);
     mp = modulation_f32;
     arm_q15_to_float(modulation2->data, modulation2_f32, AUDIO_BLOCK_SAMPLES);
-    mp2 = modulation2_f32;
+    mp2 = modulation2_f32; //TOOO try ~modulation_f32 or -modulation_f32
 
     for (uint16_t i = 0; i < AUDIO_BLOCK_SAMPLES; i++) {
 

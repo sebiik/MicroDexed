@@ -130,7 +130,7 @@ void AudioEffectModulatedDelay::update(void) {
     for (uint16_t i = 0; i < AUDIO_BLOCK_SAMPLES; i++)
     {
       // write data into circular buffer (delayline)
-      if (_cb_index >= _delay_length) //TODO make write-once-read-stereo version
+      if (_cb_index >= _delay_length)
         _cb_index = 0;
       _delayline[_cb_index] = *bp;
 
